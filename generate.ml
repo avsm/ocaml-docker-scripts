@@ -15,6 +15,7 @@ module Apt = struct
     run "apt-get -y update"
 
   let base_packages = [
+    apt_update;
     run "apt-get -y install sudo pkg-config git build-essential m4 software-properties-common aspcud unzip curl libx11-dev";
     run "git config --global user.email %S" "docker@example.com";
     run "git config --global user.name %S" "Docker CI"
