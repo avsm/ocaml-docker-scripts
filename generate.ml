@@ -11,19 +11,22 @@ let header (img,tag) = [
 
 (** Debian rules *)
 module Apt = struct
-  let apt_update =
-    run "apt-get -y update"
+  let apt_update = run "apt-get -y update"
+  let apt_install fmt = ksprintf (run "apt-get -y install %s") fmt
+  let run_as_opam fmt = ksprintf (run "sudo -u opam sh -c %S") fmt
+  let run_sh fmt = ksprintf (run "sh -c %S") fmt
 
   let base_packages = [
     apt_update;
-    run "apt-get -y install sudo pkg-config git build-essential m4 software-properties-common aspcud unzip curl libx11-dev";
+    apt_install "sudo pkg-config git build-essential m4 software-properties-common aspcud unzip curl libx11-dev";
     run "git config --global user.email %S" "docker@example.com";
     run "git config --global user.name %S" "Docker CI"
   ]
  
-  let system_compiler = [
-    run "apt-get -y install ocaml ocaml-native-compilers camlp4-extra"
-  ]
+  let system_ocaml = [ apt_install "ocaml ocaml-native-compilers camlp4-extra" ]
+  let system_opam = [ apt_install "opam aspcud" ]
+  let source_opam = [ run "git clone -b 1.2 git://github.com/ocaml/opam";
+                      run_sh "cd opam && make cold && make install" ]
 
   let ppa = function
   |`Ubuntu ->
@@ -34,11 +37,6 @@ module Apt = struct
         run "apt-key add - < Release.key";
         apt_update
       ]
-
-  let build_opam_from_source = [
-     run "git clone -b 1.2 git://github.com/ocaml/opam";
-     run "sh -c \"cd opam && make cold && make install\""
-  ]
 
   let opamhome = "/home/opam"
 
@@ -58,9 +56,6 @@ module Apt = struct
     workdir "%s" opamhome;
     ]
 
-  let run_as_opam =
-    ksprintf (fun c -> run "sudo -u opam sh -c %S" c) 
-
   let opam_init
     ?(repo="git://github.com/ocaml/opam-repository") 
     ?(compiler_version="4.02.1") () =
@@ -69,6 +64,7 @@ module Apt = struct
       run_as_opam "opam init -a -y %s/opam-repository" opamhome;
       run_as_opam "opam switch -y %s" compiler_version;
       workdir "%s/opam-repository" opamhome;
+      run_as_opam "opam install -y opam-installext";
       onbuild (run_as_opam "cd %s/opam-repository && git pull && opam update -u -y" opamhome)
     ]
     
@@ -78,9 +74,9 @@ let ubuntu_14_04 =
   let open Apt in
   header ("ubuntu","trusty") @
   base_packages @
-  system_compiler @
+  system_ocaml @
   ppa `Ubuntu @
-  build_opam_from_source @
+  source_opam @
   add_opam_user @
   opam_init ()
 
