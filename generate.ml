@@ -77,6 +77,8 @@ module Opam = struct
     run_as_opam "opam init -a -y %s/opam-repository" opamhome @@
     maybe (run_as_opam "opam switch -y %s") compiler_version @@
     workdir "%s/opam-repository" opamhome @@
+    run_as_opam "opam config exec ocaml -version" @@
+    run_as_opam "opam --version" @@
     onbuild (run_as_opam "cd %s/opam-repository && git pull && opam update -u -y" opamhome)
 
   let source_opam =
@@ -163,6 +165,7 @@ let _ =
     (match ppa with
      | `SUSE -> RPM.opensuse_repo distro @@ RPM.system_opam
      | `None -> Opam.source_opam) @@
+    run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
     Linux.RPM.add_user ~sudo:true "opam" @@
     Opam.opam_init ?compiler_version ()
   in
@@ -181,7 +184,7 @@ let _ =
   (* Now install Core/Async distributions from the OPAM base *)
   let core tag =
     header ("avsm/docker-opam-build", tag) @@
-    Opam.run_as_opam "opam installext async_ssl jenga cohttp"
+    Opam.run_as_opam "env OPAMYES=1 opam installext async_ssl jenga cohttp"
   in
   gen_dockerfiles "docker-opam-core-build" [
     "ubuntu-14.04-ocaml-4.02.1-core", core "ubuntu-14.04-ocaml-4.02.1-local";
