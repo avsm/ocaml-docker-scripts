@@ -52,14 +52,16 @@ module Apt = struct
         run "echo %S > /etc/apt/sources.list.d/opam.list" repo @@
         run "curl -OL %s/xUbuntu_%s/Release.key" url version @@
         run "apt-key add - < Release.key" @@
-        Linux.Apt.update
+        Linux.Apt.update @@
+        run "apt-get -y dist-upgrade"
     | `Debian v ->
         let version = match v with `Stable -> "7.0" | `Testing -> "8.0" in
         let repo = sprintf "deb %s/Debian_%s/ /" url version in
         run "echo %S > /etc/apt/sources.list.d/opam.list" repo @@
         run "curl -OL %s/Debian_%s/Release.key" url version @@
         run "apt-key add - < Release.key" @@
-        Linux.Apt.update
+        Linux.Apt.update @@
+        run "apt-get -y dist-upgrade"
 end
 
 module Opam = struct
@@ -75,17 +77,26 @@ module Opam = struct
     run_as_opam "opam init -a -y %s/opam-repository" opamhome @@
     maybe (run_as_opam "opam switch -y %s") compiler_version @@
     workdir "%s/opam-repository" opamhome @@
-    run_as_opam "opam install -y opam-installext" @@
     onbuild (run_as_opam "cd %s/opam-repository && git pull && opam update -u -y" opamhome)
 
   let source_opam =
     run "git clone -b 1.2 git://github.com/ocaml/opam" @@
     Linux.run_sh "cd opam && make cold && make install"
+
+  let install_ext_plugin =
+    Linux.run_sh "%s %s %s"
+           "git clone git://github.com/avsm/opam-installext &&"
+           "cd opam-installext && make &&"
+           "make PREFIX=/usr install && cd .. && rm -rf opam-installext"
 end
 
-let mkdir dir = 
-  match Sys.command (sprintf "mkdir -p %s" dir) with
-  | 0 -> () | _ -> raise (Failure ("mkdir -p " ^ dir))
+let gen_dockerfiles subdir =
+  List.iter (fun (name, docker) ->
+    (match Sys.command (sprintf "mkdir -p %s/%s" subdir name) with
+    | 0 -> () | _ -> raise (Failure (sprintf "mkdir -p %s/%s" subdir name)));
+    let fout = open_out (subdir^"/"^name^"/Dockerfile") in
+    output_string fout (string_of_t docker)
+  )
 
 (* Generate OCaml base images with particular revisions of OCaml and OPAM *)
 let _ =
@@ -101,11 +112,7 @@ let _ =
          system_ocaml @@
          Linux.Git.init ())
   in
-  List.iter (fun (name, docker) ->
-    mkdir ("docker-ocaml-build/" ^ name);
-    let fout = open_out ("docker-ocaml-build/"^name^"/Dockerfile") in
-    output_string fout (string_of_t docker)
-  ) [
+  gen_dockerfiles "docker-ocaml-build" [
      "ubuntu-14.04", apt_base ("ubuntu", "trusty");
      "ubuntu-14.10", apt_base ("ubuntu", "utopic");
      "ubuntu-15.04", apt_base ("ubuntu", "vivid");
@@ -136,6 +143,7 @@ let _ =
     add_comment ?compiler_version ~ppa tag @@
     header ("avsm/docker-ocaml-build", tag) @@
     Linux.Git.init () @@
+    Opam.install_ext_plugin @@
     (match ppa with
      | `SUSE -> Apt.opensuse_repo distro @@ Apt.system_opam
      | `None -> Opam.source_opam) @@
@@ -151,17 +159,14 @@ let _ =
     add_comment ?compiler_version ~ppa tag @@
     header ("avsm/docker-ocaml-build", tag) @@
     Linux.Git.init () @@
+    Opam.install_ext_plugin @@
     (match ppa with
-     | `SUSE -> RPM.opensuse_repo distro
+     | `SUSE -> RPM.opensuse_repo distro @@ RPM.system_opam
      | `None -> Opam.source_opam) @@
     Linux.RPM.add_user ~sudo:true "opam" @@
     Opam.opam_init ?compiler_version ()
   in
-  List.iter (fun (name, docker) ->
-    mkdir("docker-opam-build/" ^ name);
-    let fout = open_out ("docker-opam-build/"^name^"/Dockerfile") in
-    output_string fout (string_of_t docker)
-  ) [
+  gen_dockerfiles "docker-opam-build" [
     "ubuntu-14.04-ocaml-4.01.0-system",   apt_opam (`Ubuntu `V14_04);
     "ubuntu-14.04-ocaml-4.01.0-local",    apt_opam ~compiler_version:"4.01.0" (`Ubuntu `V14_04);
     "ubuntu-14.04-ocaml-4.02.1-local",    apt_opam ~compiler_version:"4.02.1" (`Ubuntu `V14_04);
@@ -172,5 +177,14 @@ let _ =
     "debian-testing-ocaml-4.02.1-local",  apt_opam ~compiler_version:"4.02.1" (`Debian `Testing);
     "centos-6-ocaml-4.02.1-system",       yum_opam ~ppa:`SUSE `CentOS6;
     "centos-7-ocaml-4.02.1-system",       yum_opam ~ppa:`SUSE `CentOS7;
-    ]
-
+  ];
+  (* Now install Core/Async distributions from the OPAM base *)
+  let core tag =
+    header ("avsm/docker-opam-build", tag) @@
+    Opam.run_as_opam "opam installext async_ssl jenga cohttp"
+  in
+  gen_dockerfiles "docker-opam-core-build" [
+    "ubuntu-14.04-ocaml-4.02.1-core", core "ubuntu-14.04-ocaml-4.02.1-local";
+    "debian-stable-ocaml-4.02.1-core", core "debian-stable-ocaml-4.02.1-system";
+    "centos-7-ocaml-4.02.1-system", core "centos-7-ocaml-4.02.1-system";
+  ]
