@@ -73,9 +73,7 @@ module Opam = struct
     env ["OPAMYES","1"] @@
     run_as_opam "git clone %s" repo @@
     run_as_opam "opam init -a -y %s/opam-repository" opamhome @@
-    (match compiler_version with
-     | None -> empty
-     | Some v -> run_as_opam "opam switch -y %s" v) @@
+    maybe (run_as_opam "opam switch -y %s") compiler_version @@
     workdir "%s/opam-repository" opamhome @@
     run_as_opam "opam install -y opam-installext" @@
     onbuild (run_as_opam "cd %s/opam-repository && git pull && opam update -u -y" opamhome)
