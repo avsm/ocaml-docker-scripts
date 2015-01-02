@@ -115,6 +115,15 @@ let _ =
      "centos-6", rpm_base ("centos", "centos6");
      "fedora-21", rpm_base ("fedora", "21");
     ];
+  let add_comment ?compiler_version ?(ppa=`None) tag =
+    comment "OPAM for %s with %s%s" tag
+     (match compiler_version with
+      | None -> "system OCaml compiler"
+      | Some v -> "local switch of OCaml " ^ v)
+     (match ppa with
+      | `SUSE -> " and OpenSUSE PPA"
+      | `None -> "")
+  in
   (* Now build the OPAM distributions from this base *)
   let apt_opam ?compiler_version ?(ppa=`None) distro =
     let tag =
@@ -124,13 +133,7 @@ let _ =
       |`Debian `Stable -> "debian-stable"
       |`Debian `Testing -> "debian-testing"
     in
-    comment "OPAM for %s with %s%s" tag
-     (match compiler_version with
-      | None -> "system OCaml compiler"
-      | Some v -> "local switch of OCaml " ^ v)
-     (match ppa with
-      | `SUSE -> " and OpenSUSE PPA"
-      | `None -> "") @@
+    add_comment ?compiler_version ~ppa tag @@
     header ("avsm/docker-ocaml-build", tag) @@
     Linux.Git.init () @@
     (match ppa with
@@ -139,12 +142,20 @@ let _ =
     Linux.Apt.add_user ~sudo:true "opam" @@
     Opam.opam_init ?compiler_version ()
   in
-  let yum_opam_base_system_latest distro tag =
-    header ("avsm/docker-ocaml-build",tag) @@
-    RPM.opensuse_repo distro @@
-    RPM.system_opam @@
+  let yum_opam ?compiler_version ?(ppa=`None) distro =
+    let tag =
+      match distro with 
+      |`CentOS6 -> "centos-6"
+      |`CentOS7 -> "centos-7"
+    in
+    add_comment ?compiler_version ~ppa tag @@
+    header ("avsm/docker-ocaml-build", tag) @@
+    Linux.Git.init () @@
+    (match ppa with
+     | `SUSE -> RPM.opensuse_repo distro
+     | `None -> Opam.source_opam) @@
     Linux.RPM.add_user ~sudo:true "opam" @@
-    Opam.opam_init ()
+    Opam.opam_init ?compiler_version ()
   in
   List.iter (fun (name, docker) ->
     mkdir("docker-opam-build/" ^ name);
@@ -159,6 +170,7 @@ let _ =
     "debian-testing-ocaml-4.01.0-system", apt_opam (`Debian `Testing);
     "debian-stable-ocaml-4.02.1-system",  apt_opam ~ppa:`SUSE (`Debian `Stable);
     "debian-testing-ocaml-4.02.1-local",  apt_opam ~compiler_version:"4.02.1" (`Debian `Testing);
-    "centos-7-ocaml-4.02.1-system",       yum_opam_base_system_latest `CentOS7 "centos-7";
+    "centos-6-ocaml-4.02.1-system",       yum_opam ~ppa:`SUSE `CentOS6;
+    "centos-7-ocaml-4.02.1-system",       yum_opam ~ppa:`SUSE `CentOS7;
     ]
 
