@@ -77,7 +77,7 @@ module Opam = struct
     run_as_opam "opam init -a -y %s/opam-repository" opamhome @@
     maybe (run_as_opam "opam switch -y %s") compiler_version @@
     workdir "%s/opam-repository" opamhome @@
-    run_as_opam "opam config exec ocaml -version" @@
+    run_as_opam "opam config exec -- ocaml -version" @@
     run_as_opam "opam --version" @@
     onbuild (run_as_opam "cd %s/opam-repository && git pull && opam update -u -y" opamhome)
 
