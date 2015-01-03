@@ -18,10 +18,12 @@ module RPM = struct
   let opensuse_repo = function
   | `CentOS7 ->
       let url = "http://download.opensuse.org/repositories/home:ocaml/CentOS_7/home:ocaml.repo" in
-      run "curl -o /etc/yum.repos.d/home:ocaml.repo -OL %s" url
+      run "curl -o /etc/yum.repos.d/home:ocaml.repo -OL %s" url @@
+      run "yum -y upgrade"
   | `CentOS6 ->
       let url = "http://download.opensuse.org/repositories/home:ocaml/CentOS_6/home:ocaml.repo" in
-      run "curl -o /etc/yum.repos.d/home:ocaml.repo -OL %s" url
+      run "curl -o /etc/yum.repos.d/home:ocaml.repo -OL %s" url @@
+      run "yum -y upgrade"
 
   let system_ocaml =
     Linux.RPM.install "ocaml ocaml-camlp4-devel ocaml-ocamldoc"
