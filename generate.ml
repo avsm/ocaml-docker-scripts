@@ -183,6 +183,7 @@ let _ =
     "debian-testing-ocaml-4.02.1-local",  apt_opam ~compiler_version:"4.02.1" (`Debian `Testing);
     "centos-6-ocaml-4.02.1-system",       yum_opam ~ppa:`SUSE `CentOS6;
     "centos-7-ocaml-4.02.1-system",       yum_opam ~ppa:`SUSE `CentOS7;
+    "centos-7-ocaml-4.01.0-local",        yum_opam ~compiler_version:"4.01.0" `CentOS7;
   ];
   (* Now install Core/Async distributions from the OPAM base *)
   let core tag =
