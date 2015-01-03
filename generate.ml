@@ -188,7 +188,7 @@ let _ =
   (* Now install Core/Async distributions from the OPAM base *)
   let core tag =
     header ("avsm/docker-opam-build", tag) @@
-    Opam.run_as_opam "env OPAMYES=1 opam installext async_ssl jenga cohttp"
+    Opam.run_as_opam "env OPAMYES=1 OPAMJOBS=2 opam installext async_ssl jenga cohttp cryptokit menhir core_bench yojson core_extended"
   in
   gen_dockerfiles "docker-opam-core-build" [
     "ubuntu-14.04-ocaml-4.02.1-core", core "ubuntu-14.04-ocaml-4.02.1-local";
