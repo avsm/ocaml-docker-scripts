@@ -28,8 +28,9 @@ module RPM = struct
   let system_ocaml =
     Linux.RPM.install "ocaml ocaml-camlp4-devel ocaml-ocamldoc"
 
-  let system_opam =
-    Linux.RPM.install "opam"
+  let system_opam = function
+  | `CentOS7 -> Linux.RPM.install "opam aspcud"
+  | `CentOS6 -> Linux.RPM.install "opam"
 end
 
 (** Debian rules *)
@@ -165,7 +166,7 @@ let _ =
     Linux.Git.init () @@
     Opam.install_ext_plugin @@
     (match ppa with
-     | `SUSE -> RPM.opensuse_repo distro @@ RPM.system_opam
+     | `SUSE -> RPM.opensuse_repo distro @@ RPM.system_opam distro
      | `None -> Opam.source_opam) @@
     run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
     Linux.RPM.add_user ~sudo:true "opam" @@
