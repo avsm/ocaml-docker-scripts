@@ -1,0 +1,9 @@
+[submodule "docker-ocaml-build"]
+	path = docker-ocaml-build
+	url = git@gitbhub.com:avsm/docker-ocaml-build
+[submodule "docker-opam-build"]
+	path = docker-opam-build
+	url = git@gitbhub.com:avsm/docker-opam-build
+[submodule "docker-opam-core-build"]
+	path = docker-opam-core-build
+	url = git@gitbhub.com:avsm/docker-opam-core-build
