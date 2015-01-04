@@ -204,8 +204,8 @@ let _ =
     header ("avsm/docker-opam-archive", "latest") @@
     Opam.run_as_opam "opam update -u -y" in
   gen_dockerfiles "bulk-build/containers" [
-    "ubuntu-14.04-ocaml-4.02.1", local_build "ubuntu-14.04-ocaml-4.02.1";
-    "debian-stable-ocaml-4.01.0", local_build "debian-stable-ocaml-4.01.0";
-    "centos-7-ocaml-4.01.0", local_build "centos-7-ocaml-4.01.0";
+    "local-ubuntu-14.04-ocaml-4.02.1", local_build "ubuntu-14.04-ocaml-4.02.1";
+    "local-debian-stable-ocaml-4.01.0", local_build "debian-stable-ocaml-4.01.0";
+    "local-centos-7-ocaml-4.01.0", local_build "centos-7-ocaml-4.01.0";
     "opam-archive", local_archive
   ];
