@@ -176,7 +176,7 @@ let _ =
     "debian-testing-ocaml-4.02.1-local",  apt_opam ~compiler_version:"4.02.1" (`Debian `Testing);
     "centos-6-ocaml-4.02.1-system",       yum_opam ~ppa:`SUSE `CentOS6;
     "centos-7-ocaml-4.02.1-system",       yum_opam ~ppa:`SUSE `CentOS7;
-    "centos-7-ocaml-4.01.0-local",        yum_opam ~compiler_version:"4.01.0" `CentOS7;
+    "centos-7-ocaml-4.01.0-local",        yum_opam ~ppa:`SUSE ~compiler_version:"4.01.0" `CentOS7;
   ];
   (* Now install Core/Async distributions from the OPAM base *)
   let core tag =
@@ -192,7 +192,9 @@ let _ =
   let opam_archive =
     header ("avsm/docker-opam-build", "ubuntu-14.04-ocaml-4.02.1-system") @@
     Opam.run_as_opam "OPAMYES=1 OPAMJOBS=2 opam installext lwt tls cohttp" @@
-    Opam.run_as_opam "cd /home/opam/opam-repository && opam-admin make" in
+    Opam.run_as_opam "cd /home/opam/opam-repository && opam-admin make" @@
+    onbuild (Opam.run_as_opam "cd /home/opam/opam-repository && opam-admin make")
+  in
   gen_dockerfiles "docker-opam-archive" [ "opam-archive", opam_archive ];
   (* For bulk builds, generate a local Dockerfile set so ONBUILD triggers are hit
      and the opam-repository git checkout is refreshed.  This also causes the
