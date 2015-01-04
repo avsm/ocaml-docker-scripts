@@ -208,6 +208,6 @@ let _ =
   gen_dockerfiles "bulk-build/containers" [
     "local-ubuntu-14.04-ocaml-4.02.1", local_build "ubuntu-14.04-ocaml-4.02.1";
     "local-debian-stable-ocaml-4.01.0", local_build "debian-stable-ocaml-4.01.0";
-    "local-centos-7-ocaml-4.01.0", local_build "centos-7-ocaml-4.01.0";
+    "local-centos-7-ocaml-4.02.1", local_build "centos-7-ocaml-4.02.1";
     "opam-archive", local_archive
   ];
