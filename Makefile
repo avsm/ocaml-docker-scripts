@@ -1,4 +1,4 @@
-.PHONY: all
+.PHONY: all depend sync add-submodules diff clean
 all:
 	./generate.ml
 
@@ -19,3 +19,6 @@ add-submodules:
 diff:
 	git diff
 	git submodule foreach git diff
+
+clean:
+	rm -f generate.ml.exe
