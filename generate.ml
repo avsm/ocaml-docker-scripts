@@ -200,8 +200,7 @@ let _ =
      and the opam-repository git checkout is refreshed.  This also causes the
      default opam remote to be pointed to a container called opam-archive. *)
   let local_build tag =
-    header ("avsm/docker-opam-build", tag) @@
-    Opam.run_as_opam "opam repository set-url default http://opam-archive:8080" in
+    header ("avsm/docker-opam-build", tag) in
   let local_archive =
     header ("avsm/docker-opam-archive", "latest") @@
     Opam.run_as_opam "opam update -u -y" in
