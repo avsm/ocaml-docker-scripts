@@ -4,8 +4,17 @@ OCaml and OPAM Docker scripts
 This repository uses the [OCaml Dockerfile](https://avsm.github.io/ocaml-dockerfile)
 library to generate a series of Dockerfiles for various combinations of
 [OCaml](http://ocaml.org) and the [OPAM](https://opam.ocaml.org) package manager.
-There is a single simple script called `generate-ocaml-dockerfiles.ml` that outputs
-all the combinations and is easy to modify for your own use.
+There is a single simple script called `generate.ml` that outputs all the combinations
+and is easy to modify for your own use.  You can also get this script by running:
+
+    opam install docker-scripts
+
+The script will then be installed in:
+
+    `opam config var bin`/ocaml-docker-scripts
+
+It can be executed directly as a shell script by using the
+[OCamlScript](http://mjambon.com/ocamlscript.html) engine.
 
 ## Docker Repostories
 
