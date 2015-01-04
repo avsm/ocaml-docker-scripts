@@ -187,4 +187,10 @@ let _ =
     "ubuntu-14.04-ocaml-4.02.1-core", core "ubuntu-14.04-ocaml-4.02.1-local";
     "debian-stable-ocaml-4.02.1-core", core "debian-stable-ocaml-4.02.1-system";
     "centos-7-ocaml-4.02.1-system", core "centos-7-ocaml-4.02.1-system";
-  ]
+  ];
+  (* Generate an archive HTTP server that can be used to serve the archive files from *)
+  let opam_archive =
+    header ("avsm/docker-opam-build", "ubuntu-14.04-ocaml-4.02.1-system") @@
+    Opam.run_as_opam "OPAMYES=1 OPAMJOBS=2 opam installext lwt tls cohttp" @@
+    Opam.run_as_opam "cd /home/opam/opam-repository && opam-admin make" in
+  gen_dockerfiles "docker-opam-archive" [ "opam-archive", opam_archive ]

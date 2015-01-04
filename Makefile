@@ -15,6 +15,7 @@ add-submodules:
 	git submodule add git@github.com:avsm/docker-ocaml-build
 	git submodule add git@github.com:avsm/docker-opam-build
 	git submodule add git@github.com:avsm/docker-opam-core-build
+	git submodule add git@github.com:avsm/docker-opam-archive
 
 diff:
 	git diff
