@@ -193,4 +193,19 @@ let _ =
     header ("avsm/docker-opam-build", "ubuntu-14.04-ocaml-4.02.1-system") @@
     Opam.run_as_opam "OPAMYES=1 OPAMJOBS=2 opam installext lwt tls cohttp" @@
     Opam.run_as_opam "cd /home/opam/opam-repository && opam-admin make" in
-  gen_dockerfiles "docker-opam-archive" [ "opam-archive", opam_archive ]
+  gen_dockerfiles "docker-opam-archive" [ "opam-archive", opam_archive ];
+  (* For bulk builds, generate a local Dockerfile set so ONBUILD triggers are hit
+     and the opam-repository git checkout is refreshed.  This also causes the
+     default opam remote to be pointed to a container called opam-archive. *)
+  let local_build tag =
+    header ("avsm/docker-opam-build", tag) @@
+    Opam.run_as_opam "opam repository set-url default http://opam-archive:8080" in
+  let local_archive =
+    header ("avsm/docker-opam-archive", "latest") @@
+    Opam.run_as_opam "opam update -u -y" in
+  gen_dockerfiles "bulk-build/containers" [
+    "ubuntu-14.04-ocaml-4.02.1", local_build "ubuntu-14.04-ocaml-4.02.1";
+    "debian-stable-ocaml-4.01.0", local_build "debian-stable-ocaml-4.01.0";
+    "centos-7-ocaml-4.01.0", local_build "centos-7-ocaml-4.01.0";
+    "opam-archive", local_archive
+  ];

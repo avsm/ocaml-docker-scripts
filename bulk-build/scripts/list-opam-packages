@@ -1,0 +1,15 @@
+#!/bin/sh -e
+# Build an OPAM package for a given OS/OCaml version combination.
+# Requires an "opam-archive" container to be running.
+# See the `run-opam-archive-container` script to do this.
+
+TAG=$1
+J=2
+
+if [ "$TAG" = "" ]; then
+  echo "Usage: $0 <tag>"
+  echo "e.g.: $0 avsm/docker-opam-build:ubuntu-4.04-ocaml-4.02.1"
+  exit 1
+fi
+
+sudo docker run --rm=true $TAG opam list -s -a

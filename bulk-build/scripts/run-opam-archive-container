@@ -1,0 +1,4 @@
+#!/bin/sh -ex
+# Runs a container that is listening on opam-archive:8080 with an OPAM repository
+
+sudo docker run -p 8080 -d --name opam-archive avsm/docker-opam-archive opam config exec cohttp-server-lwt

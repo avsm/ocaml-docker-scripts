@@ -1,0 +1,17 @@
+#!/bin/sh -e
+# Build an OPAM package for a given OS/OCaml version combination.
+# Requires an "opam-archive" container to be running.
+# See the `run-opam-archive-container` script to do this.
+
+TAG=$1
+PKGS=$2
+J=2
+
+if [ "$PKGS" = "" ]; then
+  echo "Usage: $0 <tag> pkg pkg2 pkg3 ..."
+  echo "e.g.: $0 avsm/docker-opam-build:ubuntu-4.04-ocaml-4.02.1 lwt tls cohttp"
+  exit 1
+fi
+
+sudo docker run --rm=true --link opam-archive:opam-archive $TAG \
+  /bin/sh -c "opam repository add local http://opam-archive:8080 && env OPAMYES=1 OPAMJOBS=${J} opam $PKGS"
