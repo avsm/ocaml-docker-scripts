@@ -97,26 +97,20 @@ end
 
 let gen_dockerfiles subdir =
   List.iter (fun (name, docker) ->
+    printf "Generating: %s/%s/Dockerfile\n" subdir name;
     (match Sys.command (sprintf "mkdir -p %s/%s" subdir name) with
     | 0 -> () | _ -> raise (Failure (sprintf "mkdir -p %s/%s" subdir name)));
     let fout = open_out (subdir^"/"^name^"/Dockerfile") in
-    output_string fout (string_of_t docker)
-  )
+    output_string fout (string_of_t docker))
 
-(* Generate OCaml base images with particular revisions of OCaml and OPAM *)
 let _ =
+  (* Generate OCaml base images with particular revisions of OCaml and OPAM *)
   let apt_base (base,tag) = 
     header (base,tag) @@
-    Apt.(base_packages @@
-         system_ocaml @@
-         Linux.Git.init ()) 
-  in
+    Apt.(base_packages @@ system_ocaml @@ Linux.Git.init ()) in
   let rpm_base (base,tag) =
     header (base,tag) @@
-    RPM.(base_packages @@
-         system_ocaml @@
-         Linux.Git.init ())
-  in
+    RPM.(base_packages @@ system_ocaml @@ Linux.Git.init ()) in
   gen_dockerfiles "docker-ocaml-build" [
      "ubuntu-14.04", apt_base ("ubuntu", "trusty");
      "ubuntu-14.10", apt_base ("ubuntu", "utopic");
@@ -127,6 +121,7 @@ let _ =
      "centos-6", rpm_base ("centos", "centos6");
      "fedora-21", rpm_base ("fedora", "21");
     ];
+  (* Now build the OPAM distributions from the OCaml base *)
   let add_comment ?compiler_version ?(ppa=`None) tag =
     comment "OPAM for %s with %s%s" tag
      (match compiler_version with
@@ -136,7 +131,6 @@ let _ =
       | `SUSE -> " and OpenSUSE PPA"
       | `None -> "")
   in
-  (* Now build the OPAM distributions from this base *)
   let apt_opam ?compiler_version ?(ppa=`None) distro =
     let tag =
       match distro with
@@ -147,7 +141,6 @@ let _ =
     in
     add_comment ?compiler_version ~ppa tag @@
     header ("avsm/docker-ocaml-build", tag) @@
-    Linux.Git.init () @@
     Opam.install_ext_plugin @@
     (match ppa with
      | `SUSE -> Apt.opensuse_repo distro @@ Apt.system_opam
