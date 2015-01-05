@@ -20,6 +20,7 @@ list-packages: .list-all
 
 .list-all: $(IMAGES:%=.list-%)
 	cat $^ > $@
+	echo .stamp-pkg-all: $(IMAGES:%=.stamp-pkg-%) >> $@
 
 .stamp-logdir:
 	#rm -rf logs
@@ -40,15 +41,18 @@ list-packages: .list-all
 
 .list-%: .stamp-build-%
 	rm -f $@
-	for i in `sudo docker run $* opam list -s -a`; do \
+	pkgs=`sudo docker run $* opam list -s -a`; \
+	for i in $$pkgs; do \
+	  plist="$$plist logs/$*/raw/$$i"; \
 	  echo "logs/$*/raw/$$i : .stamp-log-$* .stamp-build-$*" >> $@; \
 	  echo "\t./scripts/build-opam-package logs/ $* $$i" >> $@; \
-	done
+	done; \
+	echo ".stamp-pkg-$*: $$plist" >> $@
 
-.PRECIOUS: .stamp-* .list-* .log-*
+.PRECIOUS: .stamp-* .list-*
 
 clean:
-	rm -f .stamp-* .list-* .log-*
+	rm -f .stamp-* .list-*
 
 ifneq ($(MAKECMDGOALS),clean)
 -include .list-all
