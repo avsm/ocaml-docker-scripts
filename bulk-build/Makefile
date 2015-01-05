@@ -12,6 +12,9 @@ run-opam-archive: .stamp-run-opam-archive
 build-%: .stamp-build-%
 	@ :
 
+bulk: .stamp-pkg-all
+	@ :
+
 local-images: $(IMAGES:%=build-%)
 	@ :
 
