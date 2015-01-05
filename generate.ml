@@ -170,7 +170,7 @@ let _ =
     "ubuntu-14.04-ocaml-4.01.0-local",    apt_opam ~compiler_version:"4.01.0" (`Ubuntu `V14_04);
     "ubuntu-14.04-ocaml-4.02.1-local",    apt_opam ~compiler_version:"4.02.1" (`Ubuntu `V14_04);
     "ubuntu-14.04-ocaml-4.02.1-system",   apt_opam ~ppa:`SUSE (`Ubuntu `V14_04);
-    "debian-stable-ocaml-4.01.0-system",  apt_opam ~compiler_version:"4.01.0" ~(`Debian `Stable);
+    "debian-stable-ocaml-4.01.0-system",  apt_opam ~compiler_version:"4.01.0" (`Debian `Stable);
     "debian-testing-ocaml-4.01.0-system", apt_opam (`Debian `Testing);
     "debian-stable-ocaml-4.02.1-system",  apt_opam ~ppa:`SUSE (`Debian `Stable);
     "debian-testing-ocaml-4.02.1-local",  apt_opam ~compiler_version:"4.02.1" (`Debian `Testing);
