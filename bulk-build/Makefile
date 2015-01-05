@@ -1,53 +1,40 @@
-.PHONY: depend  clean
-REPO=avsm/docker-opam-archive
-IMAGES=$(shell find containers -maxdepth 1 -name local-* -type d| xargs -n1 basename) 
+.PHONY: depend clean
+
+include Makefile.config
 
 # Build local containers
-depend: .list-all
-	@ :
-
-run-opam-archive: .stamp-run-opam-archive
-	@ :
-
-build-%: .stamp-build-%
-	@ :
-
-bulk: .stamp-pkg-all
-	@ :
-
-local-images: $(IMAGES:%=build-%)
-	@ :
-
-list-packages: .list-all
-	@ :
+depend: 
+	#sudo $(DOCKER) pull -a $(REPO)
+	#sudo $(DOCKER) pull -a $(OPAM_REPO)
+	$(MAKE) .list-all
+	echo Now run this to perform the full bulk build
+	echo "make -j <jobs> -f Makefile.bulk"
 
 .list-all: $(IMAGES:%=.list-%)
 	cat $^ > $@
 	echo .stamp-pkg-all: $(IMAGES:%=.stamp-pkg-%) >> $@
 
-.stamp-logdir:
-	#rm -rf logs
-	mkdir -p logs
-	touch $@
+.stamp-build-tmp-%:
+	cd containers/local-$* && sudo $(DOCKER) build --no-cache=true -t tmp-$* . > ../../$@
 
-.stamp-log-%: .stamp-logdir
-	#rm -rf logs/$*
-	mkdir -p logs/$*/raw logs/$*/err logs/$*/ok
-	touch $@
-	
-.stamp-build-%:
-	cd containers/$* && sudo docker build --no-cache=true -t $* . > ../../$@
+.stamp-build-local-%: .stamp-run-opam-archive .stamp-build-tmp-%
+	sudo $(DOCKER) rm -f local-archive-$* || true
+	sudo $(DOCKER) run --link opam-archive:opam-archive --name local-archive-$* tmp-$* opam repository set-url default http://opam-archive:8080 2>&1 > $@ 
+	sudo $(DOCKER) commit local-archive-$* local-$* >> $@
+
+.stamp-build-opam-archive:
+	cd containers/opam-archive && sudo $(DOCKER) build --no-cache=true -t opam-archive . > ../../$@
 
 .stamp-run-opam-archive: .stamp-build-opam-archive
-	sudo docker rm -f opam-archive || true
-	sudo docker run -p 8080 -d --name opam-archive opam-archive opam config exec cohttp-server-lwt > $@
+	sudo $(DOCKER) rm -f opam-archive || true
+	sudo $(DOCKER) run -p 8080 -d --name opam-archive opam-archive opam config exec cohttp-server-lwt > $@
 
 .list-%: .stamp-build-%
-	rm -f $@
-	pkgs=`sudo docker run $* opam list -s -a`; \
+	@rm -f $@
+	pkgs=`sudo $(DOCKER) run $* opam list -s -a`; \
 	for i in $$pkgs; do \
 	  plist="$$plist logs/$*/raw/$$i"; \
-	  echo "logs/$*/raw/$$i : .stamp-log-$* .stamp-build-$*" >> $@; \
+	  echo "logs/$*/raw/$$i : .stamp-log-$*" >> $@; \
 	  echo "\t./scripts/build-opam-package logs/ $* $$i" >> $@; \
 	done; \
 	echo ".stamp-pkg-$*: $$plist" >> $@
@@ -56,7 +43,3 @@ list-packages: .list-all
 
 clean:
 	rm -f .stamp-* .list-*
-
-ifneq ($(MAKECMDGOALS),clean)
--include .list-all
-endif

@@ -1,0 +1,16 @@
+include Makefile.config
+
+.PHONY: all
+all: .stamp-pkg-all
+	@ :
+
+.stamp-logdir:
+	mkdir -p logs
+	@touch $@
+
+.stamp-log-%: .stamp-logdir
+	mkdir -p logs/$*/raw logs/$*/err logs/$*/ok logs/$*/tmp
+	@touch $@
+
+include .list-all
+
