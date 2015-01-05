@@ -3,11 +3,8 @@ REPO=avsm/docker-opam-archive
 IMAGES=$(shell find containers -maxdepth 1 -name local-* -type d| xargs -n1 basename) 
 
 # Build local containers
-depend:
-	sudo docker pull $(REPO)
-	$(MAKE) build-opam-archive
-	$(MAKE) run-opam-archive
-	$(MAKE) local-images
+depend: .list-all
+	@ :
 
 run-opam-archive: .stamp-run-opam-archive
 	@ :
@@ -24,9 +21,6 @@ list-packages: .list-all
 .list-all: $(IMAGES:%=.list-%)
 	cat $^ > $@
 
-.deps: .list-all
-	
-	
 .stamp-logdir:
 	#rm -rf logs
 	mkdir -p logs
@@ -47,7 +41,7 @@ list-packages: .list-all
 .list-%: .stamp-build-%
 	rm -f $@
 	for i in `sudo docker run $* opam list -s -a`; do \
-	  echo "logs/$*/raw/$$i : .stamp-log-$*" >> $@; \
+	  echo "logs/$*/raw/$$i : .stamp-log-$* .stamp-build-$*" >> $@; \
 	  echo "\t./scripts/build-opam-package logs/ $* $$i" >> $@; \
 	done
 
@@ -55,3 +49,7 @@ list-packages: .list-all
 
 clean:
 	rm -f .stamp-* .list-* .log-*
+
+ifneq ($(MAKECMDGOALS),clean)
+-include .list-all
+endif
