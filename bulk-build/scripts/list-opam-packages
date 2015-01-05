@@ -4,7 +4,6 @@
 # See the `run-opam-archive-container` script to do this.
 
 TAG=$1
-J=2
 
 if [ "$TAG" = "" ]; then
   echo "Usage: $0 <tag>"
