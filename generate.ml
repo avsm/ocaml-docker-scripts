@@ -170,7 +170,7 @@ let _ =
     "ubuntu-14.04-ocaml-4.01.0-local",    apt_opam ~compiler_version:"4.01.0" (`Ubuntu `V14_04);
     "ubuntu-14.04-ocaml-4.02.1-local",    apt_opam ~compiler_version:"4.02.1" (`Ubuntu `V14_04);
     "ubuntu-14.04-ocaml-4.02.1-system",   apt_opam ~ppa:`SUSE (`Ubuntu `V14_04);
-    "debian-stable-ocaml-4.01.0-system",  apt_opam (`Debian `Stable);
+    "debian-stable-ocaml-4.01.0-system",  apt_opam ~compiler_version:"4.01.0" ~(`Debian `Stable);
     "debian-testing-ocaml-4.01.0-system", apt_opam (`Debian `Testing);
     "debian-stable-ocaml-4.02.1-system",  apt_opam ~ppa:`SUSE (`Debian `Stable);
     "debian-testing-ocaml-4.02.1-local",  apt_opam ~compiler_version:"4.02.1" (`Debian `Testing);
@@ -205,8 +205,10 @@ let _ =
     header ("avsm/docker-opam-archive", "latest") @@
     Opam.run_as_opam "opam update -u -y" in
   gen_dockerfiles "bulk-build/containers" [
+    "local-ubuntu-14.04-ocaml-4.01.0", local_build "ubuntu-14.04-ocaml-4.01.0";
     "local-ubuntu-14.04-ocaml-4.02.1", local_build "ubuntu-14.04-ocaml-4.02.1";
     "local-debian-stable-ocaml-4.01.0", local_build "debian-stable-ocaml-4.01.0";
+    "local-debian-stable-ocaml-4.02.1", local_build "debian-stable-ocaml-4.02.1";
     "local-centos-7-ocaml-4.02.1", local_build "centos-7-ocaml-4.02.1";
     "opam-archive", local_archive
   ];
