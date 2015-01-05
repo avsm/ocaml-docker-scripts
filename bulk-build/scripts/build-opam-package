@@ -18,7 +18,7 @@ fi
 
 LOG=$LOGDIR/$TAG/raw/$PKG
 sudo docker run --rm=true --link opam-archive:opam-archive $TAG \
-  /bin/sh -c "opam repository add local http://opam-archive:8080 && env OPAMYES=1 OPAMJOBS=${J} opam installext $PKG" > $LOG
+  /bin/sh -c "opam repository add local http://opam-archive:8080 && env OPAMVERBOSE=1 OPAMYES=1 OPAMJOBS=${J} opam installext $PKG" > $LOG 2>&1
 RES=$?
 if [ $RES -eq 0 ]; then
   ln -nfs ../raw/$PKG $LOGDIR/$TAG/ok/$PKG
