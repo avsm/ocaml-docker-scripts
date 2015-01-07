@@ -3,7 +3,7 @@ REPO=avsm/docker-opam-archive
 IMAGES=$(shell find containers -maxdepth 1 -name local-* -type d| xargs -n1 basename) 
 
 # Build local containers
-depend: .list-all
+depend: .list-all run-opam-archive
 	@ :
 
 run-opam-archive: .stamp-run-opam-archive
