@@ -192,8 +192,8 @@ let _ =
   let opam_archive =
     header ("avsm/docker-opam-build", "ubuntu-14.04-ocaml-4.02.1-system") @@
     Opam.run_as_opam "OPAMYES=1 OPAMJOBS=2 opam installext lwt tls cohttp" @@
-    Opam.run_as_opam "cd /home/opam/opam-repository && opam-admin make" @@
-    onbuild (Opam.run_as_opam "cd /home/opam/opam-repository && opam-admin make")
+    Opam.run_as_opam "cd /home/opam/opam-repository && opam-admin make"
+    (* onbuild (Opam.run_as_opam "cd /home/opam/opam-repository && opam-admin make") *)
   in
   gen_dockerfiles "docker-opam-archive" [ "opam-archive", opam_archive ];
   (* For bulk builds, generate a local Dockerfile set so ONBUILD triggers are hit
