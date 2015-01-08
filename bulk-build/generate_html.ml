@@ -1,5 +1,5 @@
 #!/usr/bin/env ocamlscript
-Ocaml.packs := ["unix"; "str"; "cow"; "cow.syntax"]
+Ocaml.packs := ["unix"; "str"; "cow"; "cow.syntax"; "cmdliner"]
 --
 
 (** All the operating system and OCaml version combinations *)
@@ -175,19 +175,44 @@ let rewrite_log_as_html os ver pkg =
   Printf.fprintf fout "%s" (Cow.Html.to_string out);
   close_out fout
 
-let _ = 
+let generate_logs () = 
   List.iter (fun os ->
     List.iter (fun ver ->
       List.iter (fun pkg ->
         if Sys.file_exists (dir "raw" os ver pkg) then
           rewrite_log_as_html os ver pkg
-        else Printf.eprintf "Skipping %s\n%!" (dir "raw" os ver pkg)
+        else Printf.eprintf "Skipping: %s\n%!" (dir "raw" os ver pkg)
       ) all_packages
     ) versions
   ) os
 
-let _ =
+let generate_index () =
   html ~title:"OCaml and OPAM Bulk Build Results" results
   |> Cow.Html.to_string
   |> print_endline
+
+open Cmdliner
+
+let run logs =
+  generate_index ();
+  if logs then generate_logs ()
+
+let cmd =
+  let gen_logs =
+    let doc = "Generate HTML logfiles." in
+    Arg.(value & flag & info ["g";"generate-logs"] ~doc)
+  in
+  let doc = "Generate HTML documentation for OPAM logs" in
+  let man = [
+    `S "DESCRIPTION";
+    `P "This command generates a static HTML frontend to OPAM logfiles.
+        The option will also process the logfiles themselves
+        which is quite timeconsuming for large builds.";
+    `S "BUGS";
+    `P "Report them to <opam-devel@lists.ocaml.org>"; ]
+  in
+  Term.(pure run $ gen_logs),
+  Term.info "generate-opam-html" ~version:"1.0.0" ~doc ~man
+
+let () = match Term.eval cmd with `Error _ -> exit 1 | _ -> exit 0
 

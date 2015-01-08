@@ -7,4 +7,4 @@ homepage: "https://github.com/avsm/ocaml-docker-scripts"
 dev-repo: "https://github.com/avsm/ocaml-docker-scripts.git"
 bug-reports: "https://github.com/avsm/ocaml-docker-scripts/issues"
 license: "ISC"
-depends: [ "ocamlscript" ]
+depends: [ "ocamlscript" "cmdliner" ]
