@@ -9,7 +9,7 @@ all: .stamp-pkg-all
 	@touch $@
 
 .stamp-log-%: .stamp-logdir
-	mkdir -p logs/$*/raw logs/$*/err logs/$*/ok logs/$*/tmp
+	mkdir -p logs/$*/raw logs/$*/err logs/$*/ok logs/$*/tmp logs/$*/meta
 	@touch $@
 
 include .list-all

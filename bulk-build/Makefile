@@ -13,8 +13,8 @@ depend:
 html: index.html
 	@ :
 
-index.html:
-	./generate_html.ml > index.html
+index.html: generate_html.ml
+	./generate_html.ml
 
 .list-all: $(IMAGES:%=.list-%)
 	cat $^ > $@
@@ -39,9 +39,11 @@ index.html:
 	@rm -f $@
 	pkgs=`sudo $(DOCKER) run $* opam list -s -a`; \
 	for i in $$pkgs; do \
-	  plist="$$plist logs/$*/raw/$$i"; \
+	  plist="$$plist logs/$*/raw/$$i logs/$*/meta/$$i"; \
 	  echo "logs/$*/raw/$$i:" >> $@; \
 	  echo "\t./scripts/build-opam-package logs/ $* $$i" >> $@; \
+	  echo "logs/$*/meta/$$i:" >> $@; \
+	  echo "\topam show $$i -f homepage > $@" >> $@; \
 	done; \
 	echo ".stamp-pkg-$*: $$plist" >> $@
 
