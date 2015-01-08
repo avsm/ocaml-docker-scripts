@@ -161,6 +161,7 @@ let rewrite_log_as_html os ver pkg =
   let fin = open_in logfile in
   let title = Printf.sprintf "Build Log for %s on %s with OCaml %s" pkg os ver in
   let body = process_file fin (fun a l -> <:html<$a$<pre>$str:l$</pre>&>>) in
+  close_in fin;
   let status =
     if is_ok os ver pkg then <:html<<b>Build Status:</b> <span class="buildok">Success</span>&>>
     else if is_err os ver pkg then <:html<<b>Build Status:</b> <span class="buildfail">Failure</span>&>>
