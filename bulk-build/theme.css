@@ -34,7 +34,12 @@ colgroup:nth-child(even).results { background-color: #f9f9f9 }
 colgroup:nth-child(odd).results { background-color: #f1f1f1 }
 colgroup.results { text-align: center; }
 .pkgname { background-color: #eeeeff }
-.sortrow { background-color: #222299; color: white }
 td { border-bottom: 1px dashed #dddddd }
-.secondrow { background-color: #4444aa; color: white; font-size: 95% }
-.thirdrow { background-color: #6666bb; color: white; font-size: 90% }
+.sortrow { background-color: #222255; color: white }
+.secondrow { background-color: #222299; color: white; font-size: 95% }
+.thirdrow { background-color: #444499; color: white; font-size: 90% }
+
+.fullsuccess { background-color: #22aa22; padding-left: 5px; padding-right: 5px }
+.somesuccess { background-color: #FFA500; padding-left: 5px; padding-right: 5px }
+.allfail     { background-color: #FF2222; padding-left: 5px; padding-right: 5px }
+.notbuilt    { background-color: #999999; padding-left: 5px; padding-right: 5px }

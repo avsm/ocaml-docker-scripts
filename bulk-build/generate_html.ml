@@ -45,15 +45,30 @@ let num_os = List.length os
 let dir ty os ver pkg = Printf.sprintf "logs/local-%s-ocaml-%s/%s/%s" os ver ty pkg
 let is_ok os ver pkg = Sys.file_exists (dir "ok" os ver pkg)
 let is_err os ver pkg = Sys.file_exists (dir "err" os ver pkg)
+let package_map pkg fn = List.flatten (List.map (fun os -> List.map (fun v -> fn os v pkg) versions) os)
+let package_status pkg =
+  let num_success =
+     List.fold_left (fun a b -> if b then a+1 else a) 0 (package_map pkg is_ok) in
+  let num_fails =
+     List.fold_left (fun a b -> if b then a+1 else a) 0 (package_map pkg is_err) in
+
+Printf.eprintf "%s %d %d\n" pkg num_success num_fails; 
+  if num_success > 0 && num_fails = 0 then "fullsuccess" else 
+  if num_success > 0 && num_fails > 0 then "somesuccess" else
+  if num_success = 0 && num_fails > 0 then "allfail" else
+  "notbuilt"
 
 (** HTML output functions *)
 let html ~title body =
   <:html<<html>
-    <head><meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="theme.css"/>
-    <title>$str:title$</title></head><body>$body$</body></html>&>>
+    <head>
+     <meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="theme.css"/>
+     <title>$str:title$</title></head><body>$body$</body></html>&>>
 
-let cell_ok os ver pkg = <:html<<td class="ok"><a href=$str:dir "raw" os ver pkg$>✔</a></td>&>>
-let cell_err os ver pkg = <:html<<td class="err"><a href=$str:dir "raw" os ver pkg$>✘</a></td>&>>
+let cell_ok os ver pkg =
+  <:html<<td class="ok"><a href=$str:dir "raw" os ver pkg$>✔</a></td>&>>
+let cell_err os ver pkg =
+  <:html<<td class="err"><a href=$str:dir "raw" os ver pkg$>✘</a></td>&>>
 let cell_unknown os ver pkg = <:html<<td class="unknown">●</td>&>>
 let cell_space = <:html<<td></td>&>>
 
@@ -84,10 +99,10 @@ let results =
      List.map (fun v ->
        <:html<<th class=$str:cl$ colspan=$int:cs$>$str:v$</th>&>>) versions in
    let pkg_row pkg =
-      <:html<<tr>
-        <td class="firstpkg"><b>$str:pkg$</b></td>
+      <:html<<tr class="pkgrow">
+        <td class=$str:package_status pkg$><b>$str:pkg$</b></td>
         $pkg_ents pkg$
-        <td class="lastpkg"><b>$str:pkg$</b></td>
+        <td class=$str:package_status pkg$><b>$str:pkg$</b></td>
         </tr>&>> in
    let os_colgroups =
      List.map (fun os ->
