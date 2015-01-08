@@ -73,6 +73,14 @@ let cell_err os ver pkg =
 let cell_unknown os ver pkg = <:html<<td class="unknown">●</td>&>>
 let cell_space = <:html<<td></td>&>>
 
+let link_pkgname pkg =
+  let fin = Unix.open_process_in (Printf.sprintf "opam show %s -f homepage" pkg) in
+  let h = try match input_line fin with "" -> None | h -> Some h with End_of_file -> None in
+  ignore(Unix.close_process_in fin);
+  match h with
+  | None -> <:html<$str:pkg$>>
+  | Some h -> <:html<<a href=$str:h$>$str:pkg$</a>&>>
+  
 let pkg_ents pkg =
   let by_os =
     List.map (fun os ->
@@ -100,10 +108,11 @@ let results =
      List.map (fun v ->
        <:html<<th class=$str:cl$ colspan=$int:cs$>$str:v$</th>&>>) versions in
    let pkg_row pkg =
+      let pkg_link = link_pkgname pkg in
       <:html<<tr class="pkgrow">
-        <td class=$str:package_status pkg$><b>$str:pkg$</b></td>
+        <td class=$str:package_status pkg$><b>$pkg_link$</b></td>
         $pkg_ents pkg$
-        <td class=$str:package_status pkg$><b>$str:pkg$</b></td>
+        <td class=$str:package_status pkg$><b>$pkg_link$</b></td>
         </tr>&>> in
    let os_colgroups =
      List.map (fun os ->
@@ -170,7 +179,9 @@ let rewrite_log_as_html os ver pkg =
     <html><head>
      <meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="../../../theme.css"/>
      <title>$str:title$</title></head>
-     <body><h1>$str:title$</h1><h2>$status$</h2><hr />
+     <body><h1>$str:title$</h1>
+       <h2>$status$</h2>
+       <h2><a href="../../../index.html">Return to Index</a></h2><hr />
        $list:body$</body></html>&>> in
   Printf.fprintf fout "%s" (Cow.Html.to_string out);
   close_out fout

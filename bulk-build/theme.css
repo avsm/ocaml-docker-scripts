@@ -34,10 +34,10 @@ colgroup:nth-child(even).results { background-color: #f9f9f9 }
 colgroup:nth-child(odd).results { background-color: #f1f1f1 }
 colgroup.results { text-align: center; }
 .pkgname { background-color: #eeeeff }
-td { border-bottom: 1px dashed #dddddd }
-.sortrow { background-color: #222255; color: white }
-.secondrow { background-color: #222299; color: white; font-size: 95% }
-.thirdrow { background-color: #444499; color: white; font-size: 90% }
+td { border-bottom: 1px dashed #999999 }
+.sortrow { background-color: #000000; color: white }
+.secondrow { background-color: #333333; color: white; font-size: 95% }
+.thirdrow { background-color: #555555; color: white; font-size: 90% }
 
 .fullsuccess { background-color: #22aa22; padding-left: 5px; padding-right: 5px }
 .somesuccess { background-color: #FFA500; padding-left: 5px; padding-right: 5px }
@@ -46,6 +46,8 @@ td { border-bottom: 1px dashed #dddddd }
 
 h1 { font-size: 150%; margin-bottom: 0.5em }
 .buildok { font-weight: bold; color: green; margin-bottom: 1em }
+.buildfail { font-weight: bold; color: red; margin-bottom: 1em }
+.buildunknown { font-weight: bold; color: gray; margin-bottom: 1em }
 
 tt, code, pre { font-family: WorkAroundWebKitAndMozilla, monospace; 
                 font-size: 1em; }
