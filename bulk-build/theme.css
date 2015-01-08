@@ -16,7 +16,6 @@ body { font: normal 10pt/1.375em helvetica, arial, sans-serif; text-align:left;
 table { border-spacing: 0px; }
 td.ok { text-align: center; }
 td.err { text-align: center; }
-td.pkgname { text-align: right; padding-right: 5px }
 colgroup.results { text-align: center }
 th { padding-right: 5px; padding-left: 5px; text-align: center}
 b { font-weight: bold }
@@ -32,6 +31,7 @@ pre code { font-size : inherit; }
 a:link { text-decoration: none; }
 a:visited { text-decoration: none; }
 
-col.first { width: 2em; background-color: #eed; }
+col.first { width: 2em; background-color: #eed; text-align: right }
+col.last { width: 2em; background-color: #eed; text-align: left }
 colgroup:nth-child(even) { background-color: #cccccc }
 colgroup:nth-child(odd) { background-color: #dddddd }

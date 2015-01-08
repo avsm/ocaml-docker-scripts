@@ -55,34 +55,48 @@ let html ~title body =
 let cell_ok os ver pkg = <:html<<td class="ok"><a href=$str:dir "raw" os ver pkg$>✔</a></td>&>>
 let cell_err os ver pkg = <:html<<td class="err"><a href=$str:dir "raw" os ver pkg$>✘</a></td>&>>
 let cell_unknown os ver pkg = <:html<<td class="unknown">&nbsp;</td>&>>
+let cell_space = <:html<<td></td>&>>
 
 let pkg_ents pkg =
-  List.flatten (
+  let by_os =
     List.map (fun os ->
       List.map (fun ver ->
         if is_ok os ver pkg then cell_ok os ver pkg
         else if is_err os ver pkg then cell_err os ver pkg
         else cell_unknown os ver pkg
       ) versions
-    ) os
-  )
+    ) os in
+  let by_ver =
+    List.map (fun ver ->
+      List.map (fun os ->
+        if is_ok os ver pkg then cell_ok os ver pkg
+        else if is_err os ver pkg then cell_err os ver pkg
+        else cell_unknown os ver pkg
+      ) os
+    ) versions in
+  <:html<$list:List.flatten by_os$<td></td>$list:List.flatten by_ver$>>
 
 let results =
-   let os_headers = List.map (fun os -> <:html<<th colspan=$int:num_versions$>$str:os$</th>&>>) os in
-   let version_headers = List.map (fun v -> <:html<<th>$str:v$</th>&>>) versions in
-   let pkg_row pkg = <:html<<tr><td class="pkgname"><b>$str:pkg$</b></td>$list:pkg_ents pkg$</tr>&>> in
-   let colgroups = List.map (fun os -> <:html<<colgroup class="results"><col span="2" /></colgroup>&>>) os in
+   let os_headers cs = List.map (fun os -> <:html<<th colspan=$int:cs$>$str:os$</th>&>>) os in
+   let version_headers cs = List.map (fun v -> <:html<<th colspan=$int:cs$>$str:v$</th>&>>) versions in
+   let pkg_row pkg = <:html<<tr><td class="pkgname"><b>$str:pkg$</b></td>$pkg_ents pkg$<td class="pkgname"><b>$str:pkg$</b></td></tr>&>> in
+   let os_colgroups = List.map (fun os -> <:html<<colgroup class="results"><col span=$int:num_versions$ /></colgroup>&>>) os in
+   let ver_colgroups = List.map (fun os -> <:html<<colgroup class="results"><col span=$int:num_os$ /></colgroup>&>>) os in
    <:html<
-      <table border="1">
-        <col class="first"/>$list:colgroups$
-        <tr><th></th>$list:os_headers$</tr>
-        <tr><th></th>$list:repeat num_os version_headers$</tr>
+      <table>
+        <col class="first"/>$list:os_colgroups$<col class="spacing" />
+                            $list:ver_colgroups$<col class="last" />
+        <tr><th></th><th colspan=$int:num_versions * num_os$>Sort by OS</th><th></th>
+          <th colspan=$int:num_versions * num_os$>Sort by Version</th><th></th></tr>
+        <tr><th></th>$list:os_headers num_versions$<th></th>$list:version_headers num_os$<th></th></tr>
+        <tr><th></th>$list:repeat num_os (version_headers 1)$<th> </th>
+                     $list:repeat num_versions (os_headers 1)$<th></th></tr>
         $list:List.map pkg_row all_packages$
       </table>
    >>
 
 let _ =
-  html ~title:"Test Results" results
+  html ~title:"OCaml and OPAM Bulk Build Results" results
   |> Cow.Html.to_string
   |> print_endline
 
