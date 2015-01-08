@@ -1,4 +1,4 @@
-.PHONY: depend clean
+.PHONY: depend clean html
 
 include Makefile.config
 
@@ -9,6 +9,12 @@ depend:
 	$(MAKE) .list-all
 	echo Now run this to perform the full bulk build
 	echo "make -j <jobs> -f Makefile.bulk"
+
+html: index.html
+	@ :
+
+index.html:
+	./generate_html.ml > index.html
 
 .list-all: $(IMAGES:%=.list-%)
 	cat $^ > $@

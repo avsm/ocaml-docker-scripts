@@ -1,0 +1,54 @@
+/* Reset a few things. */
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,
+a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,
+small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,
+form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td 
+{ margin: 0; padding: 0; border: 0 none; outline: 0; font-size: 100%; 
+  font-weight: inherit; font-style:inherit; font-family:inherit; 
+  line-height: inherit; vertical-align: baseline; text-align:inherit;
+  color:inherit; }
+
+body { font: normal 10pt/1.375em helvetica, arial, sans-serif; text-align:left;
+       margin: 1.375em 10%; min-width: 40ex; max-width: 72ex;
+       color: black;  /* url(line-height-22.gif) */; }
+
+table { border-spacing: 0px; }
+td.ok { text-align: center; }
+td.err { text-align: center; }
+td.unknown { text-align: center; }
+b { font-weight: bold }
+em { font-style: italic } 
+th { padding-right: 5px; padding-left: 5px; text-align: center}
+
+.ok { color: #007700; }
+.err { color: #990000; }
+.unknown { color: #aaaaaa; }
+
+a:link { text-decoration: none; }
+a:visited { text-decoration: none; }
+
+th.filler { background-color: white }
+.firstpkg { text-align: right; padding-right: 5px; background-color: #fafafa; }
+.lastpkg { text-align: left; padding-left: 5px; background-color: #fafafa; }
+colgroup:nth-child(even).results { background-color: #f9f9f9 }
+colgroup:nth-child(odd).results { background-color: #f1f1f1 }
+colgroup.results { text-align: center; }
+.pkgname { background-color: #eeeeff }
+td { border-bottom: 1px dashed #dddddd }
+.sortrow { background-color: #222255; color: white }
+.secondrow { background-color: #222299; color: white; font-size: 95% }
+.thirdrow { background-color: #444499; color: white; font-size: 90% }
+
+.fullsuccess { background-color: #22aa22; padding-left: 5px; padding-right: 5px }
+.somesuccess { background-color: #FFA500; padding-left: 5px; padding-right: 5px }
+.allfail     { background-color: #FF2222; padding-left: 5px; padding-right: 5px }
+.notbuilt    { background-color: #999999; padding-left: 5px; padding-right: 5px }
+
+h1 { font-size: 150%; margin-bottom: 0.5em }
+.buildok { font-weight: bold; color: green; margin-bottom: 1em }
+
+tt, code, pre { font-family: WorkAroundWebKitAndMozilla, monospace; 
+                font-size: 1em; }
+pre code { font-size : inherit; }
+.codepre { margin-bottom:1.375em /* after code example we introduce space. */ } 
+
