@@ -6,32 +6,35 @@ form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td
 { margin: 0; padding: 0; border: 0 none; outline: 0; font-size: 100%; 
   font-weight: inherit; font-style:inherit; font-family:inherit; 
   line-height: inherit; vertical-align: baseline; text-align:inherit;
-  color:inherit; background: transparent; }
+  color:inherit; }
 
 body { font: normal 10pt/1.375em helvetica, arial, sans-serif; text-align:left;
        margin: 1.375em 10%; min-width: 40ex; max-width: 72ex;
-       color: black; background: transparent /* url(line-height-22.gif) */; }
-
+       color: black;  /* url(line-height-22.gif) */; }
 
 table { border-spacing: 0px; }
 td.ok { text-align: center; }
 td.err { text-align: center; }
-colgroup.results { text-align: center }
-th { padding-right: 5px; padding-left: 5px; text-align: center}
+td.unknown { text-align: center; }
 b { font-weight: bold }
 em { font-style: italic } 
+th { padding-right: 5px; padding-left: 5px; text-align: center}
 
 .ok { color: #007700; }
 .err { color: #990000; }
-tt, code, pre { font-family: WorkAroundWebKitAndMozilla, monospace; 
-                font-size: 1em; }
-pre code { font-size : inherit; }
-.codepre { margin-bottom:1.375em /* after code example we introduce space. */ } 
+.unknown { color: #aaaaaa; }
 
 a:link { text-decoration: none; }
 a:visited { text-decoration: none; }
 
-col.first { width: 2em; background-color: #eed; text-align: right }
-col.last { width: 2em; background-color: #eed; text-align: left }
-colgroup:nth-child(even) { background-color: #cccccc }
-colgroup:nth-child(odd) { background-color: #dddddd }
+th.filler { background-color: white }
+.firstpkg { text-align: right; padding-right: 5px; background-color: #fafafa; }
+.lastpkg { text-align: left; padding-left: 5px; background-color: #fafafa; }
+colgroup:nth-child(even).results { background-color: #f9f9f9 }
+colgroup:nth-child(odd).results { background-color: #f1f1f1 }
+colgroup.results { text-align: center; }
+.pkgname { background-color: #eeeeff }
+.sortrow { background-color: #222299; color: white }
+td { border-bottom: 1px dashed #dddddd }
+.secondrow { background-color: #4444aa; color: white; font-size: 95% }
+.thirdrow { background-color: #6666bb; color: white; font-size: 90% }

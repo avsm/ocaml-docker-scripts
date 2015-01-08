@@ -54,7 +54,7 @@ let html ~title body =
 
 let cell_ok os ver pkg = <:html<<td class="ok"><a href=$str:dir "raw" os ver pkg$>✔</a></td>&>>
 let cell_err os ver pkg = <:html<<td class="err"><a href=$str:dir "raw" os ver pkg$>✘</a></td>&>>
-let cell_unknown os ver pkg = <:html<<td class="unknown">&nbsp;</td>&>>
+let cell_unknown os ver pkg = <:html<<td class="unknown">●</td>&>>
 let cell_space = <:html<<td></td>&>>
 
 let pkg_ents pkg =
@@ -77,21 +77,54 @@ let pkg_ents pkg =
   <:html<$list:List.flatten by_os$<td></td>$list:List.flatten by_ver$>>
 
 let results =
-   let os_headers cs = List.map (fun os -> <:html<<th colspan=$int:cs$>$str:os$</th>&>>) os in
-   let version_headers cs = List.map (fun v -> <:html<<th colspan=$int:cs$>$str:v$</th>&>>) versions in
-   let pkg_row pkg = <:html<<tr><td class="pkgname"><b>$str:pkg$</b></td>$pkg_ents pkg$<td class="pkgname"><b>$str:pkg$</b></td></tr>&>> in
-   let os_colgroups = List.map (fun os -> <:html<<colgroup class="results"><col span=$int:num_versions$ /></colgroup>&>>) os in
-   let ver_colgroups = List.map (fun os -> <:html<<colgroup class="results"><col span=$int:num_os$ /></colgroup>&>>) os in
+   let os_headers cl cs =
+     List.map (fun os ->
+       <:html<<th class=$str:cl$ colspan=$int:cs$>$str:os$</th>&>>) os in
+   let version_headers cl cs =
+     List.map (fun v ->
+       <:html<<th class=$str:cl$ colspan=$int:cs$>$str:v$</th>&>>) versions in
+   let pkg_row pkg =
+      <:html<<tr>
+        <td class="firstpkg"><b>$str:pkg$</b></td>
+        $pkg_ents pkg$
+        <td class="lastpkg"><b>$str:pkg$</b></td>
+        </tr>&>> in
+   let os_colgroups =
+     List.map (fun os ->
+       <:html<<colgroup class="results">
+         <col span=$int:num_versions$ /></colgroup>&>>) os in
+   let ver_colgroups =
+     List.map (fun os ->
+       <:html<<colgroup class="results">
+         <col span=$int:num_os$ /></colgroup>&>>) os in
    <:html<
       <table>
-        <col class="first"/>$list:os_colgroups$<col class="spacing" />
-                            $list:ver_colgroups$<col class="last" />
-        <tr><th></th><th colspan=$int:num_versions * num_os$>Sort by OS</th><th></th>
-          <th colspan=$int:num_versions * num_os$>Sort by Version</th><th></th></tr>
-        <tr><th></th>$list:os_headers num_versions$<th></th>$list:version_headers num_os$<th></th></tr>
-        <tr><th></th>$list:repeat num_os (version_headers 1)$<th> </th>
-                     $list:repeat num_versions (os_headers 1)$<th></th></tr>
-        $list:List.map pkg_row all_packages$
+        <colgroup><col class="firstpkg"/></colgroup>
+        $list:os_colgroups$
+        <colgroup><col class="spacing" /></colgroup>
+        $list:ver_colgroups$
+        <colgroup><col class="lastpkg"/></colgroup>
+        <tr>
+          <th class="filler"></th>
+          <th class="sortrow" colspan=$int:num_versions * num_os$>Sort by OS</th>
+          <th class="filler"></th>
+          <th class="sortrow" colspan=$int:num_versions * num_os$>Sort by Version</th>
+          <th class="filler"></th>
+        </tr>
+        <tr>
+          <th class="filler"></th>
+          $list:os_headers "secondrow" num_versions$
+          <th class="filler"></th>
+          $list:version_headers "secondrow" num_os$
+          <th class="filler"></th>
+        </tr>
+        <tr>
+          <th class="filler"></th>
+          $list:repeat num_os (version_headers "thirdrow" 1)$
+          <th class="filler"></th>
+          $list:repeat num_versions (os_headers "thirdrow" 1)$
+          <th class="filler"></th></tr>
+          $list:List.map pkg_row all_packages$
       </table>
    >>
 
