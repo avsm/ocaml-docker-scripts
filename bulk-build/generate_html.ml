@@ -151,7 +151,7 @@ let process_file fin fn =
         |> fn acc
         |> aux
       with End_of_file -> acc
-    in aux <:html<&>>
+    in aux []
 
 let rewrite_log_as_html os ver pkg =
   let logfile = dir "raw" os ver pkg in
@@ -160,7 +160,7 @@ let rewrite_log_as_html os ver pkg =
   Printf.eprintf "Generating: %s\n%!" ologfile;
   let fin = open_in logfile in
   let title = Printf.sprintf "Build Log for %s on %s with OCaml %s" pkg os ver in
-  let body = process_file fin (fun a l -> <:html<$a$<pre>$str:l$</pre>&>>) in
+  let body = List.rev_map (fun b -> <:html<<pre>$str:b$</pre>&>>) (process_file fin (fun a l -> l :: a)) in
   close_in fin;
   let status =
     if is_ok os ver pkg then <:html<<b>Build Status:</b> <span class="buildok">Success</span>&>>
@@ -171,7 +171,7 @@ let rewrite_log_as_html os ver pkg =
      <meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="../../../theme.css"/>
      <title>$str:title$</title></head>
      <body><h1>$str:title$</h1><h2>$status$</h2><hr />
-       $body$</body></html>&>> in
+       $list:body$</body></html>&>> in
   Printf.fprintf fout "%s" (Cow.Html.to_string out);
   close_out fout
 
@@ -187,9 +187,13 @@ let generate_logs () =
   ) os
 
 let generate_index () =
-  html ~title:"OCaml and OPAM Bulk Build Results" results
-  |> Cow.Html.to_string
-  |> print_endline
+  let b =
+    html ~title:"OCaml and OPAM Bulk Build Results" results
+    |> Cow.Html.to_string in
+  Printf.eprintf "Generating: index.html\n%!";
+  let fout = open_out "index.html" in
+  Printf.fprintf fout "%s" b;
+  close_out fout
 
 open Cmdliner
 
