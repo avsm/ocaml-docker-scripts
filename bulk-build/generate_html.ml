@@ -16,6 +16,7 @@ let all_packages =
   |> List.map (fun d -> Sys.readdir (Printf.sprintf "logs/%s/raw/" d))
   |> List.map Array.to_list
   |> List.flatten
+  |> List.filter (fun f -> not (Filename.check_suffix f ".html"))
   |> List.fold_left (fun a b -> if List.mem b a then a else b::a) []
   |> List.sort compare
 
@@ -43,16 +44,16 @@ let num_os = List.length os
 
 (** Package database *)
 let dir ty os ver pkg = Printf.sprintf "logs/local-%s-ocaml-%s/%s/%s" os ver ty pkg
+let dirlink os ver pkg = dir "raw" os ver pkg ^ ".html"
 let is_ok os ver pkg = Sys.file_exists (dir "ok" os ver pkg)
 let is_err os ver pkg = Sys.file_exists (dir "err" os ver pkg)
-let package_map pkg fn = List.flatten (List.map (fun os -> List.map (fun v -> fn os v pkg) versions) os)
+let package_map pkg fn =
+  List.flatten (List.map (fun os -> List.map (fun v -> fn os v pkg) versions) os)
 let package_status pkg =
   let num_success =
      List.fold_left (fun a b -> if b then a+1 else a) 0 (package_map pkg is_ok) in
   let num_fails =
      List.fold_left (fun a b -> if b then a+1 else a) 0 (package_map pkg is_err) in
-
-Printf.eprintf "%s %d %d\n" pkg num_success num_fails; 
   if num_success > 0 && num_fails = 0 then "fullsuccess" else 
   if num_success > 0 && num_fails > 0 then "somesuccess" else
   if num_success = 0 && num_fails > 0 then "allfail" else
@@ -66,9 +67,9 @@ let html ~title body =
      <title>$str:title$</title></head><body>$body$</body></html>&>>
 
 let cell_ok os ver pkg =
-  <:html<<td class="ok"><a href=$str:dir "raw" os ver pkg$>✔</a></td>&>>
+  <:html<<td class="ok"><a href=$str:dirlink os ver pkg$>✔</a></td>&>>
 let cell_err os ver pkg =
-  <:html<<td class="err"><a href=$str:dir "raw" os ver pkg$>✘</a></td>&>>
+  <:html<<td class="err"><a href=$str:dirlink os ver pkg$>✘</a></td>&>>
 let cell_unknown os ver pkg = <:html<<td class="unknown">●</td>&>>
 let cell_space = <:html<<td></td>&>>
 
@@ -142,6 +143,47 @@ let results =
           $list:List.map pkg_row all_packages$
       </table>
    >>
+
+let process_file fin fn =
+    let rec aux acc =
+      try
+        input_line fin
+        |> fn acc
+        |> aux
+      with End_of_file -> acc
+    in aux <:html<&>>
+
+let rewrite_log_as_html os ver pkg =
+  let logfile = dir "raw" os ver pkg in
+  let ologfile = dirlink os ver pkg in
+  let fout = open_out ologfile in
+  Printf.eprintf "Generating: %s\n%!" ologfile;
+  let fin = open_in logfile in
+  let title = Printf.sprintf "Build Log for %s on %s with OCaml %s" pkg os ver in
+  let body = process_file fin (fun a l -> <:html<$a$<pre>$str:l$</pre>&>>) in
+  let status =
+    if is_ok os ver pkg then <:html<<b>Build Status:</b> <span class="buildok">Success</span>&>>
+    else if is_err os ver pkg then <:html<<b>Build Status:</b> <span class="buildfail">Failure</span>&>>
+    else <:html<<b>Build Status:</b> <span class="buildunknown">Unknown</span>&>> in
+  let out = <:html<
+    <html><head>
+     <meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="../../../theme.css"/>
+     <title>$str:title$</title></head>
+     <body><h1>$str:title$</h1><h2>$status$</h2><hr />
+       $body$</body></html>&>> in
+  Printf.fprintf fout "%s" (Cow.Html.to_string out);
+  close_out fout
+
+let _ = 
+  List.iter (fun os ->
+    List.iter (fun ver ->
+      List.iter (fun pkg ->
+        if Sys.file_exists (dir "raw" os ver pkg) then
+          rewrite_log_as_html os ver pkg
+        else Printf.eprintf "Skipping %s\n%!" (dir "raw" os ver pkg)
+      ) all_packages
+    ) versions
+  ) os
 
 let _ =
   html ~title:"OCaml and OPAM Bulk Build Results" results
