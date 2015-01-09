@@ -6,7 +6,7 @@ include Makefile.config
 depend: 
 	sudo $(DOCKER) pull -a $(REPO)
 	sudo $(DOCKER) pull -a $(OPAM_REPO)
-	$(MAKE) .list-all logs/opam-repo-rev
+	$(MAKE) .list-all opam-repo-rev opam-build-date
 	echo Now run this to perform the full bulk build
 	echo "make -j <jobs> -f Makefile.bulk"
 
@@ -31,9 +31,12 @@ index.html: generate_html.ml
 .stamp-build-opam-archive:
 	cd containers/opam-archive && sudo $(DOCKER) build --no-cache=true -t opam-archive . > ../../$@
 
-logs/opam-repo-rev: .stamp-build-opam-archive
+opam-repo-rev: .stamp-build-opam-archive
 	mkdir -p logs
 	sudo $(DOCKER) run opam-archive git rev-parse HEAD > $@
+
+opam-build-date:
+	date > $@
 
 .stamp-run-opam-archive: .stamp-build-opam-archive
 	sudo $(DOCKER) rm -f opam-archive || true

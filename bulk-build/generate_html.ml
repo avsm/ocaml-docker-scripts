@@ -34,6 +34,15 @@ let rec repeat n x =
   | 1 -> x
   | n -> (repeat (n-1) x) @ x
 
+let with_file_input fname fn =
+  let fin = open_in fname in
+  try
+    let r = fn fin in
+    close_in fin;
+    r
+  with exn -> close_in fin; raise exn
+let read_file_line fname = with_file_input fname input_line
+
 (** List of operating system and OCaml version variants *)
 let os_hash = gen_hashtbl (fun h (os,ver) -> Hashtbl.add h os ver)
 let versions_hash = gen_hashtbl (fun h (os,ver) -> Hashtbl.add h ver os)
@@ -41,6 +50,9 @@ let versions = keys versions_hash
 let num_versions = List.length versions
 let os = keys os_hash
 let num_os = List.length os
+let opam_repo_rev = read_file_line "opam-repo-rev"
+let opam_repo_rev_short = String.sub opam_repo_rev 0 8
+let opam_build_date = read_file_line "opam-build-date"
 
 (** Package database *)
 let dir ty os ver pkg = Printf.sprintf "logs/local-%s-ocaml-%s/%s/%s" os ver ty pkg
@@ -58,13 +70,19 @@ let package_status pkg =
   if num_success > 0 && num_fails > 0 then "somesuccess" else
   if num_success = 0 && num_fails > 0 then "allfail" else
   "notbuilt"
+let buildtime os ver pkg =
+  let fname = dir "meta" os ver pkg ^ ".buildtime" in
+  if Sys.file_exists fname then
+    Some (read_file_line fname |> int_of_string)
+  else None
 
 (** HTML output functions *)
 let html ~title body =
   <:html<<html>
     <head>
      <meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="theme.css"/>
-     <title>$str:title$</title></head><body>$body$</body></html>&>>
+     <title>$str:title$</title></head>
+     <body>$body$</body></html>&>>
 
 let cell_ok os ver pkg =
   <:html<<td class="ok"><a href=$str:dirlink os ver pkg$>✔</a></td>&>>
@@ -123,6 +141,9 @@ let results =
        <:html<<colgroup class="results">
          <col span=$int:num_os$ /></colgroup>&>>) os in
    <:html<
+      <h1>OPAM Bulk Build Results</h1>
+      <h2>Built on $str:opam_build_date$ against revision
+          <a href=$str:"https://github.com/ocaml/opam-repository/tree/"^opam_repo_rev$>$str:opam_repo_rev_short$</a></h2>
       <table>
         <colgroup><col class="firstpkg"/></colgroup>
         $list:os_colgroups$
@@ -175,12 +196,16 @@ let rewrite_log_as_html os ver pkg =
     if is_ok os ver pkg then <:html<<b>Build Status:</b> <span class="buildok">Success</span>&>>
     else if is_err os ver pkg then <:html<<b>Build Status:</b> <span class="buildfail">Failure</span>&>>
     else <:html<<b>Build Status:</b> <span class="buildunknown">Unknown</span>&>> in
+  let buildtime =
+    let b = match buildtime os ver pkg with Some s -> <:html<$int:s$ seconds>> | None -> <:html<unknown>> in
+    <:html<<b>Build Time:</b> $b$>> in
   let out = <:html<
     <html><head>
      <meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="../../../theme.css"/>
      <title>$str:title$</title></head>
      <body><h1>$str:title$</h1>
        <h2>$status$</h2>
+       <h2>$buildtime$</h2>
        <h2><a href="../../../index.html">Return to Index</a></h2><hr />
        $list:body$</body></html>&>> in
   Printf.fprintf fout "%s" (Cow.Html.to_string out);
