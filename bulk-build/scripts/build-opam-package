@@ -17,8 +17,12 @@ if [ "$PKG" = "" ]; then
 fi
 
 LOG=$LOGDIR/$TAG/tmp/$PKG
+starttime=`date +%s`
 sudo docker run --rm=true --link opam-archive:opam-archive $TAG \
   /bin/sh -c "env OPAMVERBOSE=1 OPAMYES=1 OPAMJOBS=${J} opam installext $PKG" > $LOG 2>&1
+endtime=`date +%s`
+difftime=$(($endtime - $starttime))
+echo $difftime > $LOGDIR/$TAG/meta/$PKG.buildtime
 RES=$?
 if [ $RES -eq 0 ]; then
   ln -nfs ../raw/$PKG $LOGDIR/$TAG/ok/$PKG
