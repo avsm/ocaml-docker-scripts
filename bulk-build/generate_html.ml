@@ -42,6 +42,16 @@ let with_file_input fname fn =
     r
   with exn -> close_in fin; raise exn
 let read_file_line fname = with_file_input fname input_line
+let read_file fname =
+  let fin = open_in fname in
+  let b = Buffer.create 128 in
+  (try while true do
+    Buffer.add_string b (input_line fin);
+    Buffer.add_char b '\n'
+  done;
+  with End_of_file -> ());
+  close_in fin;
+  Buffer.contents b
 
 (** List of operating system and OCaml version variants *)
 let os_hash = gen_hashtbl (fun h (os,ver) -> Hashtbl.add h os ver)
@@ -141,9 +151,6 @@ let results =
        <:html<<colgroup class="results">
          <col span=$int:num_os$ /></colgroup>&>>) os in
    <:html<
-      <h1>OPAM Bulk Build Results</h1>
-      <h2>Built on $str:opam_build_date$ against revision
-          <a href=$str:"https://github.com/ocaml/opam-repository/tree/"^opam_repo_rev$>$str:opam_repo_rev_short$</a></h2>
       <table>
         <colgroup><col class="firstpkg"/></colgroup>
         $list:os_colgroups$
@@ -151,21 +158,24 @@ let results =
         $list:ver_colgroups$
         <colgroup><col class="lastpkg"/></colgroup>
         <tr>
-          <th class="filler"></th>
+          <th class="filler"><b>OPAM Bulk Builds</b></th>
           <th class="sortrow" colspan=$int:num_versions * num_os$>Sort by OS</th>
           <th class="filler"></th>
           <th class="sortrow" colspan=$int:num_versions * num_os$>Sort by Version</th>
           <th class="filler"></th>
         </tr>
         <tr>
-          <th class="filler"></th>
+          <th class="filler">$str:opam_build_date$</th>
           $list:os_headers "secondrow" num_versions$
           <th class="filler"></th>
           $list:version_headers "secondrow" num_os$
           <th class="filler"></th>
         </tr>
         <tr>
-          <th class="filler"></th>
+          <th class="filler">
+            <a href="https://github.com/ocaml/opam-repository">opam-repository</a> 
+            <a href=$str:"https://github.com/ocaml/opam-repository/tree/"^opam_repo_rev$>$str:opam_repo_rev_short$</a>
+          </th>
           $list:repeat num_os (version_headers "thirdrow" 1)$
           <th class="filler"></th>
           $list:repeat num_versions (os_headers "thirdrow" 1)$
@@ -189,7 +199,7 @@ let rewrite_log_as_html os ver pkg =
   let fout = open_out ologfile in
   Printf.eprintf "Generating: %s\n%!" ologfile;
   let fin = open_in logfile in
-  let title = Printf.sprintf "Build Log for %s on %s with OCaml %s" pkg os ver in
+  let title = Printf.sprintf "Build %s on %s / OCaml %s" pkg os ver in
   let body = List.rev_map (fun b -> <:html<<pre>$str:b$</pre>&>>) (process_file fin (fun a l -> l :: a)) in
   close_in fin;
   let status =
@@ -199,6 +209,9 @@ let rewrite_log_as_html os ver pkg =
   let buildtime =
     let b = match buildtime os ver pkg with Some s -> <:html<$int:s$ seconds>> | None -> <:html<unknown>> in
     <:html<<b>Build Time:</b> $b$>> in
+  let actions =
+    let f = read_file (dir "meta" os ver pkg ^ ".actions") in
+    <:html<<pre>$str:f$</pre>&>> in
   let out = <:html<
     <html><head>
      <meta charset="UTF-8" /><link rel="stylesheet" type="text/css" href="../../../theme.css"/>
@@ -206,8 +219,17 @@ let rewrite_log_as_html os ver pkg =
      <body><h1>$str:title$</h1>
        <h2>$status$</h2>
        <h2>$buildtime$</h2>
-       <h2><a href="../../../index.html">Return to Index</a></h2><hr />
-       $list:body$</body></html>&>> in
+       <ul>
+         <li><a href="#bottom">Jump to End of Log</a></li>
+         <li><a href="../../../index.html">Return to Index</a></li>
+       </ul>
+       <hr />
+       <h2><b>Build Actions:</b></h2>
+       $actions$
+       <hr />
+       $list:body$
+       <a name="bottom"> </a>
+       </body></html>&>> in
   Printf.fprintf fout "%s" (Cow.Html.to_string out);
   close_out fout
 

@@ -36,7 +36,7 @@ opam-repo-rev: .stamp-build-opam-archive
 	sudo $(DOCKER) run opam-archive git rev-parse HEAD > $@
 
 opam-build-date:
-	date > $@
+	date +'%a %d %b %Y' > $@
 
 .stamp-run-opam-archive: .stamp-build-opam-archive
 	sudo $(DOCKER) rm -f opam-archive || true
