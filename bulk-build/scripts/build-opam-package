@@ -18,7 +18,9 @@ fi
 
 # Record what actions the solver intends to take
 INSTLOG=$LOGDIR/$TAG/meta/${PKG}.actions
+HOMEPAGE=$LOGDIR/$TAG/meta/${PKG}.homepage
 sudo docker run --rm=true $TAG opam install --show-actions $PKG > $INSTLOG 2>&1
+sudo docker run --rm=true $TAG opam show $PKG -f homepage > $HOMEPAGE 2>&1
 # Do the actual build
 LOG=$LOGDIR/$TAG/tmp/$PKG
 starttime=`date +%s`
