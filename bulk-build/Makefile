@@ -55,4 +55,4 @@ opam-build-date:
 .PRECIOUS: .stamp-* .list-*
 
 clean:
-	rm -f .stamp-* .list-*
+	rm -f .stamp-* .list-* opam-build-date opam-repo-rev
