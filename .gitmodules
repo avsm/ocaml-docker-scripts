@@ -10,3 +10,6 @@
 [submodule "docker-opam-archive"]
 	path = docker-opam-archive
 	url = git@github.com:avsm/docker-opam-archive
+[submodule "docker-opam-coq-build"]
+	path = docker-opam-coq-build
+	url = git@github.com:avsm/docker-opam-coq-build
