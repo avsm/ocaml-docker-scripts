@@ -185,8 +185,19 @@ let _ =
   in
   gen_dockerfiles "docker-opam-core-build" [
     "ubuntu-14.04-ocaml-4.02.1-core", core "ubuntu-14.04-ocaml-4.02.1-local";
-    "debian-stable-ocaml-4.02.1-core", core "debian-stable-ocaml-4.02.1-system";
-    "centos-7-ocaml-4.02.1-system", core "centos-7-ocaml-4.02.1-system";
+    "debian-stable-ocaml-4.02.1-core", core "debian-stable-ocaml-4.02.1";
+    "centos-7-ocaml-4.02.1-system", core "centos-7-ocaml-4.02.1";
+  ];
+  (* Build the Coq remote *)
+  let coq tag =
+    header ("avsm/docker-opam-build", tag) @@
+    Opam.run_as_opam "opam repo add coq-stable https://github.com/coq/repo-stable.git" @@
+    Opam.run_as_opam "env OPAMYES=1 OPAMJOBS=2 opam installext coq"
+  in
+  gen_dockerfiles "docker-opam-coq-build" [
+    "ubuntu-14.04-ocaml-4.02.1", coq "ubuntu-14.04-ocaml-4.02.1";
+    "debian-stable-ocaml-4.01.0", coq "debian-stable-ocaml-4.01.0";
+    "centos-7-ocaml-4.02.1", coq "centos-7-ocaml-4.02.1";
   ];
   (* Generate an archive HTTP server that can be used to serve the archive files from *)
   let opam_archive =
