@@ -6,7 +6,7 @@ include Makefile.config
 depend: 
 	sudo $(DOCKER) pull -a $(REPO)
 	sudo $(DOCKER) pull -a $(OPAM_REPO)
-	$(MAKE) .list-all
+	$(MAKE) .list-all opam-repo-rev opam-build-date
 	echo Now run this to perform the full bulk build
 	echo "make -j <jobs> -f Makefile.bulk"
 
@@ -31,6 +31,13 @@ index.html: generate_html.ml
 .stamp-build-opam-archive:
 	cd containers/opam-archive && sudo $(DOCKER) build --no-cache=true -t opam-archive . > ../../$@
 
+opam-repo-rev: .stamp-build-opam-archive
+	mkdir -p logs
+	sudo $(DOCKER) run opam-archive git rev-parse HEAD > $@
+
+opam-build-date:
+	date +'%a %d %b %Y' > $@
+
 .stamp-run-opam-archive: .stamp-build-opam-archive
 	sudo $(DOCKER) rm -f opam-archive || true
 	sudo $(DOCKER) run -p 8080 -d --name opam-archive opam-archive opam config exec cohttp-server-lwt > $@
@@ -39,15 +46,13 @@ index.html: generate_html.ml
 	@rm -f $@
 	pkgs=`sudo $(DOCKER) run $* opam list -s -a`; \
 	for i in $$pkgs; do \
-	  plist="$$plist logs/$*/raw/$$i logs/$*/meta/$$i"; \
-	  echo "logs/$*/raw/$$i:" >> $@; \
+	  plist="$$plist logs/$*/raw/$$i"; \
+	  echo "logs/$*/raw/$$i: .stamp-log-$*" >> $@; \
 	  echo "\t./scripts/build-opam-package logs/ $* $$i" >> $@; \
-	  echo "logs/$*/meta/$$i:" >> $@; \
-	  echo "\topam show $$i -f homepage > $@" >> $@; \
 	done; \
 	echo ".stamp-pkg-$*: $$plist" >> $@
 
 .PRECIOUS: .stamp-* .list-*
 
 clean:
-	rm -f .stamp-* .list-*
+	rm -f .stamp-* .list-* opam-build-date opam-repo-rev
