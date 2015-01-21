@@ -202,6 +202,7 @@ let _ =
   (* Generate an archive HTTP server that can be used to serve the archive files from *)
   let opam_archive =
     header ("avsm/docker-opam-build", "ubuntu-14.04-ocaml-4.02.1-system") @@
+    Linux.Apt.update @@
     Opam.run_as_opam "OPAMYES=1 OPAMJOBS=2 opam installext lwt tls cohttp" @@
     Opam.run_as_opam "cd /home/opam/opam-repository && git pull && opam-admin make" @@
     onbuild (Opam.run_as_opam "cd /home/opam/opam-repository && git pull && opam-admin make")
