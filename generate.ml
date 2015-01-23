@@ -190,9 +190,8 @@ let _ =
   ];
   (* Generate an archive HTTP server that can be used to serve the archive files from *)
   let opam_archive =
-    header ("avsm/docker-opam-build", "ubuntu-14.04-ocaml-4.02.1-system") @@
+    header ("avsm/docker-opam-build", "ubuntu-14.04-ocaml-4.02.1") @@
     Opam.run_as_opam "OPAMYES=1 OPAMJOBS=2 opam installext lwt tls cohttp" @@
-    Opam.run_as_opam "cd /home/opam/opam-repository && git pull && opam-admin make" @@
     onbuild (Opam.run_as_opam "cd /home/opam/opam-repository && git pull && opam-admin make")
   in
   gen_dockerfiles "docker-opam-archive" [ "opam-archive", opam_archive ];
@@ -200,7 +199,10 @@ let _ =
      and the opam-repository git checkout is refreshed.  This also causes the
      default opam remote to be pointed to a container called opam-archive. *)
   let local_build tag =
-    header ("avsm/docker-opam-build", tag) in
+    header ("avsm/docker-opam-build", tag) @@
+    Linux.Git.init () @@
+    Opam.run_as_opam "cd /home/opam/opam-repository && git pull --commit --no-edit git://github.com/janestreet/opam-repository.git core-112.17.00 2>&1"
+  in
   let local_archive =
     header ("avsm/docker-opam-archive", "latest") @@
     Opam.run_as_opam "opam update -u -y" in

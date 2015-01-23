@@ -52,7 +52,7 @@ opam-build-date:
 	done; \
 	echo ".stamp-pkg-$*: $$plist" >> $@
 
-.PRECIOUS: .stamp-* .list-*
+.PRECIOUS: .stamp-* .list-* opam-build-date opam-repo-rev
 
 clean:
 	rm -f .stamp-* .list-* opam-build-date opam-repo-rev
