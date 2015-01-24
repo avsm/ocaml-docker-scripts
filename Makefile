@@ -1,6 +1,12 @@
 .PHONY: all depend sync add-submodules diff clean
+
 all:
-	./generate.ml
+	./opam-dockerfile-ocaml.ml
+	./opam-dockerfile-opam.ml
+	./opam-dockerfile-core.ml
+	./opam-dockerfile-archive.ml
+	./opam-dockerfile-coq.ml
+	./opam-dockerfile-bulk.ml
 
 depend:
 	opam install -y ocamlscript dockerfile
@@ -23,4 +29,4 @@ diff:
 	git submodule foreach git diff
 
 clean:
-	rm -f generate.ml.exe
+	rm -f *.ml.exe

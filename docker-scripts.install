@@ -1,1 +1,7 @@
-bin: ["generate.ml" {"ocaml-docker-scripts"}]
+bin: [
+  "dockerfile-ocaml.ml" { "dockerfile-ocaml" }
+  "dockerfile-opam.ml"  { "dockerfile-opam" }
+  "dockerfile-core.ml"  { "dockerfile-core" }
+  "dockerfile-coq.ml"   { "dockerfile-coq" }
+  "dockerfile-bulk.ml"  { "dockerfile-bulk" }
+]
