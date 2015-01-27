@@ -1,12 +1,12 @@
 .PHONY: all depend sync add-submodules diff clean
 
 all:
-	./opam-dockerfile-ocaml.ml
-	./opam-dockerfile-opam.ml
-	./opam-dockerfile-core.ml
-	./opam-dockerfile-archive.ml
-	./opam-dockerfile-coq.ml
-	./opam-dockerfile-bulk.ml
+	./dockerfile-ocaml.ml
+	./dockerfile-opam.ml
+	./dockerfile-core.ml
+	./dockerfile-archive.ml
+	./dockerfile-coq.ml
+	./dockerfile-bulk.ml
 
 depend:
 	opam install -y ocamlscript dockerfile

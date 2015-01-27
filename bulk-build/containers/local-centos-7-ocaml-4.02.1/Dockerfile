@@ -3,4 +3,3 @@ FROM avsm/docker-opam-build:centos-7-ocaml-4.02.1
 MAINTAINER Anil Madhavapeddy <anil@recoil.org>
 RUN git config --global user.email "docker@example.com"
 RUN git config --global user.name "Docker CI"
-RUN sudo -u opam sh -c "cd /home/opam/opam-repository && git pull --commit --no-edit git://github.com/janestreet/opam-repository.git core-112.17.00 2>&1"
