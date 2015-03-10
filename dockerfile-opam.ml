@@ -36,6 +36,9 @@ let generate output_dir =
     opam_init ?compiler_version ()
   in
   let yum_opam ?compiler_version ?(ppa=`None) distro =
+    let add_to_path path = 
+     run "echo export PATH=\"%s:$PATH\" >> /etc/profile.d/usrlocal.sh" path @@
+     run "chmod a+x /etc/profile.d/usrlocal.sh" in
     let tag =
       match distro with 
       |`CentOS6 -> "centos-6"
@@ -47,7 +50,7 @@ let generate output_dir =
     install_ext_plugin @@
     (match ppa with
      | `SUSE -> RPM.add_opensuse_repo distro @@ RPM.install_system_opam distro
-     | `None -> install_opam_from_source ()) @@
+     | `None -> install_opam_from_source () @@ add_to_path "/usr/local/bin") @@
     run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
     Linux.RPM.add_user ~sudo:true "opam" @@
     opam_init ?compiler_version () @@
