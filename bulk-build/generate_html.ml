@@ -5,7 +5,7 @@ Ocaml.packs := ["unix"; "str"; "cow"; "cow.syntax"; "cmdliner"]
 (** All the operating system and OCaml version combinations *)
 let targets =
      Sys.readdir "logs"
-  |> Array.map (fun b -> Str.string_after b 6)
+  |> Array.map (fun b -> if String.length b > 6 then Str.string_after b 6 else b)
   |> Array.map (Str.(split (regexp_string "-ocaml-")))
   |> Array.fold_left (fun a -> function [x;y] -> (x,y)::a |_ -> a) []
 

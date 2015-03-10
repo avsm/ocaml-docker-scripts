@@ -56,14 +56,14 @@ let generate output_dir =
     "ubuntu-14.04-ocaml-4.01.0-system",   apt_opam (`Ubuntu `V14_04);
     "ubuntu-14.04-ocaml-4.01.0-local",    apt_opam ~compiler_version:"4.01.0" (`Ubuntu `V14_04);
     "ubuntu-14.04-ocaml-4.02.1-local",    apt_opam ~compiler_version:"4.02.1" (`Ubuntu `V14_04);
-    "ubuntu-14.04-ocaml-4.02.1-system",   apt_opam ~ppa:`SUSE (`Ubuntu `V14_04);
+    "ubuntu-14.04-ocaml-4.02.1-system",   apt_opam (`Ubuntu `V14_04);
     "debian-stable-ocaml-4.01.0-system",  apt_opam ~compiler_version:"4.01.0" (`Debian `Stable);
     "debian-testing-ocaml-4.01.0-system", apt_opam (`Debian `Testing);
-    "debian-stable-ocaml-4.02.1-system",  apt_opam ~ppa:`SUSE (`Debian `Stable);
+    "debian-stable-ocaml-4.02.1-system",  apt_opam (`Debian `Stable);
     "debian-testing-ocaml-4.02.1-local",  apt_opam ~compiler_version:"4.02.1" (`Debian `Testing);
-    "centos-6-ocaml-4.02.1-system",       yum_opam ~ppa:`SUSE `CentOS6;
-    "centos-7-ocaml-4.02.1-system",       yum_opam ~ppa:`SUSE `CentOS7;
-    "centos-7-ocaml-4.01.0-local",        yum_opam ~ppa:`SUSE ~compiler_version:"4.01.0" `CentOS7;
+    "centos-6-ocaml-4.02.1-system",       yum_opam `CentOS6;
+    "centos-7-ocaml-4.02.1-system",       yum_opam `CentOS7;
+    "centos-7-ocaml-4.01.0-local",        yum_opam ~compiler_version:"4.01.0" `CentOS7;
   ]
 
 let _ =

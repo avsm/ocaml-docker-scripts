@@ -1,6 +1,6 @@
 #!/bin/sh -ex
 
-JOBS=15
+JOBS=25
 make clean
 make -j ${JOBS} depend
 make -j ${JOBS} -f Makefile.bulk
@@ -9,3 +9,4 @@ repoid=`cat opam-repo-rev`
 mkdir -p archive/$repoid
 mv logs archive/$repoid/
 cp index.html theme.css archive/$repoid/
+./graph.sh archive/$repoid

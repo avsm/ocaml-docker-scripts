@@ -32,8 +32,10 @@ index.html: generate_html.ml
 	cd containers/opam-archive && sudo $(DOCKER) build --no-cache=true -t opam-archive . > ../../$@
 
 opam-repo-rev: .stamp-build-opam-archive
+	rm -rf logs
 	mkdir -p logs
 	sudo $(DOCKER) run opam-archive git rev-parse HEAD > $@
+	cd logs && dog init `cat ../$@`
 
 opam-build-date:
 	date +'%a %d %b %Y' > $@
