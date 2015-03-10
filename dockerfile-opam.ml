@@ -50,7 +50,8 @@ let generate output_dir =
      | `None -> install_opam_from_source ()) @@
     run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
     Linux.RPM.add_user ~sudo:true "opam" @@
-    opam_init ?compiler_version ()
+    opam_init ?compiler_version () @@
+    run_as_opam "opam install -y depext"
   in
   generate_dockerfiles output_dir [
     "ubuntu-14.04-ocaml-4.01.0-system",   apt_opam (`Ubuntu `V14_04);
