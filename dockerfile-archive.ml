@@ -11,6 +11,7 @@ let generate output_dir =
   let opam_archive =
     header "avsm/docker-opam-build" "ubuntu-14.04-ocaml-4.02.1" @@
     run_as_opam "OPAMYES=1 OPAMJOBS=2 opam installext lwt tls cohttp" @@
+    run_as_opam "cd /home/opam/opam-repository && git pull && opam-admin make" @@
     onbuild (run_as_opam "cd /home/opam/opam-repository && git pull && opam-admin make")
   in
   generate_dockerfiles "docker-opam-archive" [ "opam-archive", opam_archive ]
