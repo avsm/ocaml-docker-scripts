@@ -30,7 +30,7 @@ let generate output_dir =
     header "avsm/docker-ocaml-build" tag @@
     install_ext_plugin @@
     (match ppa with
-     | `SUSE -> Apt.add_opensuse_repo distro @@ Apt.install_system_opam
+     | `SUSE -> Apt.add_opensuse_repo distro @@ Apt.install_system_ocaml @@ install_opam_from_source () (* Apt.install_system_opam *)
      | `None -> install_opam_from_source ()) @@
     Linux.Apt.add_user ~sudo:true "opam" @@
     opam_init ?compiler_version ()
@@ -49,7 +49,7 @@ let generate output_dir =
     Linux.Git.init () @@
     install_ext_plugin @@
     (match ppa with
-     | `SUSE -> RPM.add_opensuse_repo distro @@ RPM.install_system_opam distro
+     | `SUSE -> RPM.add_opensuse_repo distro @@ RPM.install_system_ocaml @@ install_opam_from_source ()
      | `None -> install_opam_from_source () @@ add_to_path "/usr/local/bin") @@
     run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
     Linux.RPM.add_user ~sudo:true "opam" @@
@@ -60,14 +60,14 @@ let generate output_dir =
     "ubuntu-14.04-ocaml-4.01.0-system",   apt_opam (`Ubuntu `V14_04);
     "ubuntu-14.04-ocaml-4.01.0-local",    apt_opam ~compiler_version:"4.01.0" (`Ubuntu `V14_04);
     "ubuntu-14.04-ocaml-4.02.1-local",    apt_opam ~compiler_version:"4.02.1" (`Ubuntu `V14_04);
-    "ubuntu-14.04-ocaml-4.02.1-system",   apt_opam (`Ubuntu `V14_04);
+    "ubuntu-14.04-ocaml-4.02.1-system",   apt_opam ~ppa:`SUSE (`Ubuntu `V14_04);
     "debian-stable-ocaml-4.01.0-system",  apt_opam ~compiler_version:"4.01.0" (`Debian `Stable);
     "debian-testing-ocaml-4.01.0-system", apt_opam (`Debian `Testing);
-    "debian-stable-ocaml-4.02.1-system",  apt_opam (`Debian `Stable);
+    "debian-stable-ocaml-4.02.1-system",  apt_opam ~ppa:`SUSE ~compiler_version:"4.02.1" (`Debian `Stable);
     "debian-testing-ocaml-4.02.1-local",  apt_opam ~compiler_version:"4.02.1" (`Debian `Testing);
-    "centos-6-ocaml-4.02.1-system",       yum_opam `CentOS6;
-    "centos-7-ocaml-4.02.1-system",       yum_opam `CentOS7;
-    "centos-7-ocaml-4.01.0-local",        yum_opam ~compiler_version:"4.01.0" `CentOS7;
+    "centos-6-ocaml-4.02.1-system",       yum_opam ~ppa:`SUSE `CentOS6;
+    "centos-7-ocaml-4.02.1-system",       yum_opam ~ppa:`SUSE `CentOS7;
+    "centos-7-ocaml-4.01.0-local",        yum_opam ~ppa:`SUSE ~compiler_version:"4.01.0" `CentOS7;
   ]
 
 let _ =
