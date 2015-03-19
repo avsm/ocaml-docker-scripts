@@ -11,7 +11,7 @@ let generate output_dir =
   let coq tag =
     header "avsm/docker-opam-build" tag @@
     run_as_opam "opam repo add coq-stable https://github.com/coq/repo-stable.git" @@
-    run_as_opam "env OPAMYES=1 OPAMJOBS=2 opam installext coq"
+    run_as_opam "env OPAMYES=1 OPAMVERBOSE=1 OPAMJOBS=2 opam depext -i coq"
   in
   generate_dockerfiles output_dir [
     "ubuntu-14.04-ocaml-4.02.1", coq "ubuntu-14.04-ocaml-4.02.1";

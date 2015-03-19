@@ -19,6 +19,7 @@ let generate output_dir uri branch =
   let local_build tag =
     header "avsm/docker-opam-build" tag @@
     Linux.Git.init () @@
+    run_as_opam "opam install -y depext" @@
     pull_req
   in
   generate_dockerfiles output_dir [

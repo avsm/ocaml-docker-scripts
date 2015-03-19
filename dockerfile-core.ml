@@ -13,7 +13,7 @@ let libs =
 let generate output_dir =
   let core tag =
     header "avsm/docker-opam-build" tag @@
-    run_as_opam "env OPAMYES=1 OPAMJOBS=2 opam installext %s" libs
+    run_as_opam "env OPAMYES=1 OPAMVERBOSE=1 OPAMJOBS=2 opam depext -i %s" libs
   in
   generate_dockerfiles output_dir [
     "ubuntu-14.04-ocaml-4.02.1-core", core "ubuntu-14.04-ocaml-4.02.1-local";
