@@ -33,7 +33,8 @@ let generate output_dir =
      | `SUSE -> Apt.add_opensuse_repo distro @@ Apt.install_system_ocaml @@ install_opam_from_source () (* Apt.install_system_opam *)
      | `None -> install_opam_from_source ()) @@
     Linux.Apt.add_user ~sudo:true "opam" @@
-    opam_init ?compiler_version ()
+    opam_init ?compiler_version () @@
+    run_as_opam "opam install -y depext"
   in
   let yum_opam ?compiler_version ?(ppa=`None) distro =
     let tag =
