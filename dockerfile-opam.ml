@@ -37,7 +37,7 @@ let generate output_dir =
     run "sudo apt-get -y update" @@
     run "sudo apt-get install -y lsb-release" @@
     run_as_opam "opam install -y depext" @@
-    onbuild Linux.Apt.update
+    onbuild (run "sudo apt-get -y update")
   in
   let yum_opam ?compiler_version ?(ppa=`None) distro =
     let tag =
