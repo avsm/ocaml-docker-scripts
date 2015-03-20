@@ -30,12 +30,12 @@ let generate output_dir =
     header "avsm/docker-ocaml-build" tag @@
     install_ext_plugin @@
     (match ppa with
-     | `SUSE -> Apt.add_opensuse_repo distro @@ Apt.install_system_ocaml @@ install_opam_from_source () (* Apt.install_system_opam *)
+     | `SUSE -> Apt.add_opensuse_repo distro @@ Apt.install_system_ocaml @@ install_opam_from_source () 
      | `None -> install_opam_from_source ()) @@
     Linux.Apt.add_user ~sudo:true "opam" @@
     opam_init ?compiler_version () @@
-    Linux.Apt.update @@
-    Linux.Apt.install "lsb-release" @@
+    run "sudo apt-get -y update" @@
+    run "sudo apt-get install -y lsb-release" @@
     run_as_opam "opam install -y depext" @@
     onbuild Linux.Apt.update
   in
