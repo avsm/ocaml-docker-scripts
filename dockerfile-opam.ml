@@ -34,7 +34,8 @@ let generate output_dir =
      | `None -> install_opam_from_source ()) @@
     Linux.Apt.add_user ~sudo:true "opam" @@
     opam_init ?compiler_version () @@
-    run_as_opam "opam install -y depext"
+    run_as_opam "opam install -y depext" @@
+    onbuild (Linux.Apt.update)
   in
   let yum_opam ?compiler_version ?(ppa=`None) distro =
     let tag =
