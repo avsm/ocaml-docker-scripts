@@ -28,7 +28,6 @@ let generate output_dir =
     in
     add_comment ?compiler_version ~ppa tag @@
     header "avsm/docker-ocaml-build" tag @@
-    install_ext_plugin @@
     (match ppa with
      | `SUSE -> Apt.add_opensuse_repo distro @@ Apt.install_system_ocaml @@ install_opam_from_source () 
      | `None -> install_opam_from_source ()) @@
@@ -47,7 +46,6 @@ let generate output_dir =
     add_comment ?compiler_version ~ppa tag @@
     header "avsm/docker-ocaml-build" tag @@
     Linux.Git.init () @@
-    install_ext_plugin @@
     (match ppa with
      | `SUSE -> RPM.add_opensuse_repo distro @@ RPM.install_system_ocaml @@ install_opam_from_source ~prefix:"/usr" ()
      | `None -> install_opam_from_source ~prefix:"/usr" ()) @@
