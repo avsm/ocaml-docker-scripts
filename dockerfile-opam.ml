@@ -34,8 +34,7 @@ let generate output_dir =
      | `None -> install_opam_from_source ()) @@
     Linux.Apt.add_user ~sudo:true "opam" @@
     opam_init ?compiler_version () @@
-    run "sudo apt-get -y update" @@
-    run "sudo apt-get install -y lsb-release" @@
+    run_as_opam "opam pin add depext git://github.com/avsm/opam-depext#fix-detection -n" @@
     run_as_opam "opam install -y depext" @@
     onbuild (run "sudo apt-get -y update")
   in
@@ -55,6 +54,7 @@ let generate output_dir =
     run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
     Linux.RPM.add_user ~sudo:true "opam" @@
     opam_init ?compiler_version () @@
+    run_as_opam "opam pin add depext git://github.com/avsm/opam-depext#fix-detection -n" @@
     run_as_opam "opam install -y depext"
   in
   generate_dockerfiles output_dir [
