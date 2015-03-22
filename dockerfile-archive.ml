@@ -12,7 +12,7 @@ let generate output_dir =
     header "avsm/docker-opam-build" "ubuntu-14.04-ocaml-4.02.1" @@
     run_as_opam "cd /home/opam/opam-repository && git pull origin master" @@
     run_as_opam "opam update -u -y" @@
-    run_as_opam "OPAMYES=1 OPAMJOBS=2 opam depext -i lwt tls cohttp" @@
+    run_as_opam "OPAMYES=1 OPAMJOBS=2 opam depext -u -i lwt ssl tls cohttp" @@
     run_as_opam "cd /home/opam/opam-repository && opam-admin make" @@
     onbuild (run_as_opam "cd /home/opam/opam-repository && git pull && opam-admin make")
   in
