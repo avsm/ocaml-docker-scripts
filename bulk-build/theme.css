@@ -13,9 +13,11 @@ body { font: normal 10pt/1.375em helvetica, arial, sans-serif; text-align:left;
        color: black;  /* url(line-height-22.gif) */; }
 
 table { border-spacing: 0px; }
+table.index { padding: 10px; }
 td.ok { text-align: center; }
 td.err { text-align: center; }
 td.unknown { text-align: center; }
+td.index { padding: 10px; padding-left: 20px }
 b { font-weight: bold }
 em { font-style: italic } 
 th { padding-right: 5px; padding-left: 5px; text-align: center}
