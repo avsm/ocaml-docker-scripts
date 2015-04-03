@@ -10,3 +10,4 @@ mkdir -p archive/$repoid
 mv logs archive/$repoid/
 cp index.html theme.css archive/$repoid/
 ./graph.sh archive/$repoid
+./index.sh
