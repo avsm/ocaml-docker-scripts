@@ -28,7 +28,7 @@ sudo docker run --rm=true $TAG opam show $PKG > ${META}.info 2>&1
 LOG=$LOGDIR/$TAG/tmp/$PKG
 starttime=`date +%s`
 sudo docker run --rm=true --link opam-archive:opam-archive $TAG \
-  /bin/sh -c "env OPAMVERBOSE=1 OPAMYES=1 OPAMJOBS=${J} opam depext -u -i $PKG" > $LOG 2>&1
+  /bin/sh -c "env OPAMVERBOSE=1 OPAMYES=1 OPAMJOBS=${J} opam depext -d -u -i $PKG" > $LOG 2>&1
 RES=$?
 endtime=`date +%s`
 difftime=$(($endtime - $starttime))
