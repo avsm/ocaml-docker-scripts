@@ -49,27 +49,30 @@ let diff d1 d2 =
       | `Both (Success, Success) -> None
       | `Both (Failure, Failure) -> None
     )
-  |> Map.to_alist
 
+let proc res =
+  let buf = Buffer.create 1024 in 
+  List.map res ~f:(fun (pkg,data) ->
+    let st =
+      List.map data ~f:(function
+      | New_and_works -> <:html<<span class="ok">&#9673;</span>&>>
+      | New_and_fails -> <:html<<span class="err">&#9673;</span>&>>
+      | Now_works -> <:html<<span class="ok2">&#9650;</span>&>>
+      | Now_fails -> <:html<<span class="err2">&#9660;</span>&>>
+      | Gone -> []) in
+    <:html<$str:pkg$ $list:st$ &nbsp;>>
+  ) |>
+  List.iter ~f:(Cow.Html.output (`Buffer buf));
+  print_endline (Buffer.contents buf)
+ 
 let _ =
   let d1 = Sys.argv.(1) in
   let d2 = Sys.argv.(2) in
-  let os = "local-ubuntu-14.04-ocaml-4.02.1" in
+  let d1_os = Sys.readdir (sprintf "archive/%s/logs" d1) in
+  let d2_os = Sys.readdir (sprintf "archive/%s/logs" d2) in
+  let os = Array.filter d1_os ~f:(Array.mem d2_os) in
   let dir = sprintf "archive/%s/logs/%s" in
-  diff (dir d1 os) (dir d2 os) |>
-  List.map ~f:(fun (pkg,res) ->
-    let st =
-      match res with
-      | New_and_works -> <:html<$str:pkg$<span class="ok">&#9679;</span>&>>
-      | New_and_fails -> <:html<$str:pkg$<span class="err">&#9679;</span>&>>
-      | Now_works -> <:html<$str:pkg$<span class="ok2">&#9650;</span>&>>
-      | Now_fails -> <:html<$str:pkg$<span class="err2">&#9660;</span>&>>
-      | Gone -> <:html<<strike>$str:pkg$</strike><span class="unknown">&#9679;</span>&>>
-    in
-    <:html<$st$ &nbsp;>>
-  ) |> fun l ->
-  let buf = Buffer.create 1024 in 
-  List.iter ~f:(Cow.Html.output (`Buffer buf)) l;
-  print_endline (Buffer.contents buf)
-  
-  
+  let res = Array.map os ~f:(fun os -> diff (dir d1 os) (dir d2 os)) in
+  Array.fold res ~init:String.Map.empty ~f:(fun acc b ->
+   String.Map.fold b ~init:acc ~f:(fun ~key ~data -> String.Map.add_multi ~key ~data)
+  ) |> String.Map.to_alist |> proc
