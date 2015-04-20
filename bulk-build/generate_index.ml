@@ -71,7 +71,7 @@ let results =
        | None -> <:html< none >>
        | Some (d1,d2) ->
            ignore(Sys.command (Printf.sprintf "/bin/sh -c \"./generate_diff.ml %s %s > archive/%s/diff.html\"" d1 d2 d1));
-           Cow.Html.of_string (read_file (Printf.sprintf "archive/%s/diff.html" d1)) 
+           Cow.Xml.of_string (read_file (Printf.sprintf "archive/%s/diff.html" d1)) 
      in 
      <:html<
       <tr>

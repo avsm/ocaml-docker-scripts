@@ -38,7 +38,7 @@ type diff =
 let diff d1 d2 =
   gather_res d1 |> fun r1 ->
   gather_res d2 |> fun r2 ->
-  String.Map.merge r1 r2
+  String.Map.merge r2 r1
     (fun ~key v ->
       match v with
       | `Both (Success, Failure) -> Some Now_fails
@@ -60,12 +60,16 @@ let _ =
   List.map ~f:(fun (pkg,res) ->
     let st =
       match res with
-      | New_and_works -> <:html<$str:pkg$<span class="ok">&#9650;</span>&>>
-      | New_and_fails -> <:html<$str:pkg$<span class="err">&#9660;</span>&>>
+      | New_and_works -> <:html<$str:pkg$<span class="ok">&#9679;</span>&>>
+      | New_and_fails -> <:html<$str:pkg$<span class="err">&#9679;</span>&>>
       | Now_works -> <:html<$str:pkg$<span class="ok2">&#9650;</span>&>>
       | Now_fails -> <:html<$str:pkg$<span class="err2">&#9660;</span>&>>
-      | Gone -> <:html<<strike>$str:pkg$</strike>&>>
+      | Gone -> <:html<<strike>$str:pkg$</strike><span class="unknown">&#9679;</span>&>>
     in
-    <:html<$st$ >>
-  ) |> List.map ~f:Cow.Html.to_string |> List.map ~f:print_endline
+    <:html<$st$ &nbsp;>>
+  ) |> fun l ->
+  let buf = Buffer.create 1024 in 
+  List.iter ~f:(Cow.Html.output (`Buffer buf)) l;
+  print_endline (Buffer.contents buf)
+  
   
