@@ -9,11 +9,11 @@ form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td
   color:inherit; }
 
 body { font: normal 10pt/1.375em helvetica, arial, sans-serif; text-align:left;
-       margin: 1.375em 10%; min-width: 40ex; max-width: 72ex;
+       margin: 1.375em 10%; min-width: 40ex; max-width: 80ex;
        color: black;  /* url(line-height-22.gif) */; }
 
 table { border-spacing: 0px; }
-table.index { padding: 10px; }
+table.index { padding: 10px;}
 td.ok { text-align: center; }
 td.err { text-align: center; }
 td.unknown { text-align: center; }
@@ -21,9 +21,12 @@ td.index { padding: 10px; padding-left: 20px }
 b { font-weight: bold }
 em { font-style: italic } 
 th { padding-right: 5px; padding-left: 5px; text-align: center}
+.summary { font-size: 85%; }
 
 .ok { color: #007700; }
+.ok2 { color: #00aa00; }
 .err { color: #990000; }
+.err2 { color: #cc0000; }
 .unknown { color: #aaaaaa; }
 
 a:link { text-decoration: none; }
