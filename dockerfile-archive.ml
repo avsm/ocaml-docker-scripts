@@ -9,7 +9,7 @@ open Dockerfile_opam
 
 let generate output_dir =
   let opam_archive =
-    header "avsm/docker-opam-build" "ubuntu-14.04-ocaml-4.02.1" @@
+    header "ocaml/ocaml" "ubuntu-15.10-ocaml-4.02.3" @@
     run_as_opam "cd /home/opam/opam-repository && git pull origin master" @@
     run_as_opam "opam update -u -y" @@
     run_as_opam "OPAMYES=1 OPAMJOBS=2 opam depext -u -i lwt ssl tls cohttp" @@
@@ -21,7 +21,7 @@ let generate output_dir =
 let _ =
   Dockerfile_opam_cmdliner.cmd
     ~name:"dockerfile-archive"
-    ~version:"1.0.0"
+    ~version:"1.1.0"
     ~summary:"the OPAM package archive"
     ~manual:"installs the OPAM package archive and an HTTP server using
              $(i,cohttp) to serve the contents.  This is useful when deployed

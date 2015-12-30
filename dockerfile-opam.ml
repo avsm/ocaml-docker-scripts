@@ -9,62 +9,77 @@ open Dockerfile_opam
 
 (* Build the OPAM distributions from the OCaml base *)
 let generate output_dir =
-  let add_comment ?compiler_version ?(ppa=`None) tag =
-    comment "OPAM for %s with %s%s" tag
+  let add_comment ?compiler_version tag =
+    comment "OPAM for %s with %s" tag
      (match compiler_version with
       | None -> "system OCaml compiler"
       | Some v -> "local switch of OCaml " ^ v)
-     (match ppa with
-      | `SUSE -> " and OpenSUSE PPA"
-      | `None -> "")
   in
-  let apt_opam ?compiler_version ?(ppa=`None) distro =
+  let apt_opam ?compiler_version distro =
     let tag =
       match distro with
       |`Ubuntu `V14_04 -> "ubuntu-14.04"
-      |`Ubuntu `V14_10 -> "ubuntu-14.10"
+      |`Ubuntu `V15_04 -> "ubuntu-15.04"
+      |`Ubuntu `V15_10 -> "ubuntu-15.10"
       |`Debian `Stable -> "debian-stable"
+      |`Debian `Unstable -> "debian-stable"
       |`Debian `Testing -> "debian-testing"
     in
-    add_comment ?compiler_version ~ppa tag @@
-    header "avsm/docker-ocaml-build" tag @@
-    (match ppa with
-     | `SUSE -> Apt.add_opensuse_repo distro @@ Apt.install_system_ocaml @@ install_opam_from_source () 
-     | `None -> install_opam_from_source ()) @@
+    add_comment ?compiler_version tag @@
+    header "ocaml/ocaml" tag @@
+    Linux.Apt.install "aspcud" @@
+    install_opam_from_source () @@
     Linux.Apt.add_user ~sudo:true "opam" @@
+    Linux.Git.init () @@
     opam_init ?compiler_version () @@
     run_as_opam "opam install -y depext" @@
-    onbuild (run "sudo apt-get -y update")
+    onbuild (run "sudo apt-get update && sudo apt-get -y upgrade") @@
+    entrypoint "[%S,%S,%S]" "opam" "config" "exec"
   in
-  let yum_opam ?compiler_version ?(ppa=`None) distro =
+  let yum_opam ?compiler_version distro =
     let tag =
       match distro with 
       |`CentOS6 -> "centos-6"
       |`CentOS7 -> "centos-7"
+      |`Fedora_21 -> "fedora-21"
+      |`Fedora_22 -> "fedora-22"
+      |`Fedora_23 -> "fedora-23"
+      |`Oracle_Linux_7 -> "oraclelinux-7"
     in
-    add_comment ?compiler_version ~ppa tag @@
-    header "avsm/docker-ocaml-build" tag @@
-    Linux.Git.init () @@
-    (match ppa with
-     | `SUSE -> RPM.add_opensuse_repo distro @@ RPM.install_system_ocaml @@ install_opam_from_source ~prefix:"/usr" ()
-     | `None -> install_opam_from_source ~prefix:"/usr" ()) @@
+    add_comment ?compiler_version tag @@
+    header "ocaml/ocaml-dockerfiles" tag @@
+    RPM.install_base_packages @@
+    Linux.RPM.install "tar" @@
+    install_opam_from_source ~prefix:"/usr" () @@
     run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
     Linux.RPM.add_user ~sudo:true "opam" @@
+    Linux.Git.init () @@
     opam_init ?compiler_version () @@
     run_as_opam "opam install -y depext"
   in
-  generate_dockerfiles output_dir [
-    "ubuntu-14.04-ocaml-4.01.0-system",   apt_opam (`Ubuntu `V14_04);
-    "ubuntu-14.04-ocaml-4.01.0-local",    apt_opam ~compiler_version:"4.01.0" (`Ubuntu `V14_04);
-    "ubuntu-14.04-ocaml-4.02.1-local",    apt_opam ~compiler_version:"4.02.1" (`Ubuntu `V14_04);
-    "ubuntu-14.04-ocaml-4.02.1-system",   apt_opam ~ppa:`SUSE (`Ubuntu `V14_04);
-    "debian-stable-ocaml-4.01.0-system",  apt_opam ~compiler_version:"4.01.0" (`Debian `Stable);
-    "debian-testing-ocaml-4.01.0-system", apt_opam (`Debian `Testing);
-    "debian-stable-ocaml-4.02.1-system",  apt_opam ~ppa:`SUSE ~compiler_version:"4.02.1" (`Debian `Stable);
-    "debian-testing-ocaml-4.02.1-local",  apt_opam ~compiler_version:"4.02.1" (`Debian `Testing);
-    "centos-6-ocaml-4.02.1-system",       yum_opam ~ppa:`SUSE `CentOS6;
-    "centos-7-ocaml-4.02.1-system",       yum_opam ~ppa:`SUSE `CentOS7;
-    "centos-7-ocaml-4.01.0-local",        yum_opam ~ppa:`SUSE ~compiler_version:"4.01.0" `CentOS7;
+  let apk_opam ?compiler_version () =
+    add_comment ?compiler_version "alpine" @@
+    header "ocaml/ocaml" "3.3"  (* TODO finish *)
+  in
+  generate_dockerfiles_in_git_branches output_dir [
+    "ubuntu-14.04_ocaml-4.01.0",   apt_opam ~compiler_version:"4.01.0" (`Ubuntu `V14_04);
+    "ubuntu-14.04_ocaml-4.02.3",   apt_opam ~compiler_version:"4.02.1" (`Ubuntu `V14_04);
+    "ubuntu-14.04_ocaml-4.03.0dev",apt_opam ~compiler_version:"4.03.0+trunk" (`Ubuntu `V14_04);
+    "ubuntu-15.10_ocaml-4.02.3",   apt_opam ~compiler_version:"4.02.3" (`Ubuntu `V15_10);
+    "ubuntu-15.10_ocaml-4.02.3",   apt_opam ~compiler_version:"4.02.3" (`Ubuntu `V15_10);
+    "ubuntu-15.10_ocaml-4.03.0dev",apt_opam ~compiler_version:"4.03.0+trunk" (`Ubuntu `V15_10);
+    "debian-stable_ocaml-4.01.0",  apt_opam (`Debian `Stable);
+    "debian-stable_ocaml-4.02.3",  apt_opam  ~compiler_version:"4.02.3" (`Debian `Stable);
+    "debian-testing_ocaml-4.01.0", apt_opam ~compiler_version:"4.01.0" (`Debian `Testing);
+    "debian-testing_ocaml-4.02.3", apt_opam ~compiler_version:"4.02.3" (`Debian `Testing);
+    "debian-unstable_ocaml-4.01.0", apt_opam ~compiler_version:"4.01.0" (`Debian `Testing);
+    "debian-unstable_ocaml-4.02.3", apt_opam ~compiler_version:"4.02.3" (`Debian `Testing);
+    "debian-unstable_ocaml-4.03.0dev", apt_opam ~compiler_version:"4.03.0+trunk" (`Debian `Unstable);
+    "centos-6_ocaml-4.02.3",       yum_opam ~compiler_version:"4.02.3" `CentOS6;
+    "centos-7_ocaml-4.02.3",       yum_opam ~compiler_version:"4.02.3" `CentOS7;
+    "centos-7_ocaml-4.01.0",       yum_opam ~compiler_version:"4.01.0" `CentOS7;
+    "centos-7_ocaml-4.01.0",       yum_opam ~compiler_version:"4.01.0" `CentOS7;
+    "oraclelinux-7_ocaml-4.02.3",  yum_opam ~compiler_version:"4.02.3" `Oracle_Linux_7;
   ]
 
 let _ =
@@ -76,7 +91,7 @@ let _ =
              of local compiler switches for various Linux distributions.  It
              depends on the base OCaml containers that are generated via the
              $(b,opam-dockerfile-ocaml) command."
-    ~default_dir:"docker-opam-build"
+    ~default_dir:"opam-dockerfiles"
     ~generate
   |> Dockerfile_opam_cmdliner.run
 

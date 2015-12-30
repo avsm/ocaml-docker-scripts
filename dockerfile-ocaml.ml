@@ -11,27 +11,37 @@ let generate output_dir =
   let apt_base base tag  = 
     header base tag @@
     Apt.install_base_packages @@
-    Apt.install_system_ocaml @@
-    Linux.Git.init () in
-  let rpm_base base tag =
+    Apt.install_system_ocaml
+  in
+  let rpm_base ?(ocaml=true) base tag =
     header base tag @@
     RPM.install_base_packages @@
-    RPM.install_system_ocaml @@
-    Linux.Git.init () in
-  generate_dockerfiles output_dir [
+    (if ocaml then RPM.install_system_ocaml else empty)
+  in
+  let apk_base base tag = 
+    header base tag @@
+    Linux.Apk.dev_packages ()
+  in
+  generate_dockerfiles_in_git_branches output_dir [
      "ubuntu-14.04", apt_base "ubuntu" "trusty";
-     "ubuntu-14.10", apt_base "ubuntu" "utopic";
      "ubuntu-15.04", apt_base "ubuntu" "vivid";
+     "ubuntu-15.10", apt_base "ubuntu" "wily";
      "debian-stable", apt_base "debian" "stable";
      "debian-testing", apt_base "debian" "testing";
+     "debian-unstable", apt_base "debian" "unstable";
      "centos-7", rpm_base "centos" "centos7";
      "centos-6", rpm_base "centos" "centos6";
-     "fedora-21", rpm_base "fedora" "21" ]
+     "fedora-21", rpm_base "fedora" "21";
+     "fedora-22", rpm_base "fedora" "22";
+     "fedora-23", rpm_base "fedora" "23";
+     "oraclelinux-7", rpm_base ~ocaml:false "oraclelinux" "7";
+     "alpine-3.3", apk_base "alpine" "3.3";
+  ]
 
 let _ =
   Dockerfile_opam_cmdliner.cmd
     ~name:"dockerfile-ocaml"
-    ~version:"1.0.0"
+    ~version:"1.1.0"
     ~summary:"the OCaml compiler"
     ~manual:"installs the OCaml byte and native code compiler and the
              Camlp4 preprocessor.  The version of OCaml that is installed
