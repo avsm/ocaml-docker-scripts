@@ -12,11 +12,11 @@ let libs =
 
 let generate output_dir =
   let core tag =
-    header "avsm/docker-opam-build" tag @@
+    header "ocaml/opam-dockerfiles" tag @@
     run_as_opam "env OPAMYES=1 OPAMVERBOSE=1 OPAMJOBS=2 opam depext -i %s" libs
   in
   generate_dockerfiles output_dir [
-    "ubuntu-14.04-ocaml-4.02.1-core", core "ubuntu-14.04-ocaml-4.02.1-local";
+    "ubuntu-14.04_ocaml-4.02.1-core", core "ubuntu-14.04-ocaml-4.02.1-local";
     "debian-stable-ocaml-4.02.1-core", core "debian-stable-ocaml-4.02.1";
     "centos-7-ocaml-4.02.1-system", core "centos-7-ocaml-4.02.1";
   ]
@@ -24,7 +24,7 @@ let generate output_dir =
 let _ =
   Dockerfile_opam_cmdliner.cmd
     ~name:"dockerfile-core"
-    ~version:"1.0.0"
+    ~version:"1.1.0"
     ~summary:"the Jane Street Core packages"
     ~manual:"installs the Jane Street Core OCaml packages, including
              Core, Async and the Jenga build system, for various Linux

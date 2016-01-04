@@ -20,12 +20,17 @@ let generate output_dir =
   in
   let apk_base base tag = 
     header base tag @@
-    Linux.Apk.dev_packages ()
+    Linux.Apk.dev_packages () @@
+    run "cd /etc/apk/keys && curl -OL http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/x86_64/anil@recoil.org-5687cc79.rsa.pub" @@
+    run "echo http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/ >> /etc/apk/repositories" @@
+    Linux.Apk.update @@
+    Linux.Apk.install "ocaml camlp4"
   in
   generate_dockerfiles_in_git_branches output_dir [
      "ubuntu-14.04", apt_base "ubuntu" "trusty";
      "ubuntu-15.04", apt_base "ubuntu" "vivid";
      "ubuntu-15.10", apt_base "ubuntu" "wily";
+     "ubuntu", apt_base "ubuntu" "wily"; (* latest ubuntu *)
      "debian-stable", apt_base "debian" "stable";
      "debian-testing", apt_base "debian" "testing";
      "debian-unstable", apt_base "debian" "unstable";
@@ -34,8 +39,12 @@ let generate output_dir =
      "fedora-21", rpm_base "fedora" "21";
      "fedora-22", rpm_base "fedora" "22";
      "fedora-23", rpm_base "fedora" "23";
+     "fedora", rpm_base "fedora" "23"; (* latest fedora *)
      "oraclelinux-7", rpm_base ~ocaml:false "oraclelinux" "7";
+     "oraclelinux", rpm_base ~ocaml:false "oraclelinux" "7"; (* latest oraclelinux *)
      "alpine-3.3", apk_base "alpine" "3.3";
+     "alpine-3", apk_base "alpine" "3.3";
+     "alpine", apk_base "alpine" "3.3"; (* latest alpine *)
   ]
 
 let _ =
@@ -48,7 +57,7 @@ let _ =
              is the default one available for that particular distribution.
              To customise the compiler version, use the $(b,opam-dockerfile-opam)
              command that installs OPAM and a custom compiler switch instead."
-    ~default_dir:"docker-ocaml-build"
+    ~default_dir:"ocaml-dockerfiles"
     ~generate
   |> Dockerfile_opam_cmdliner.run
 
