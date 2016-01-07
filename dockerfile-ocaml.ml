@@ -7,30 +7,37 @@ Ocaml.packs := ["dockerfile.opam"; "dockerfile.opam-cmdliner"]
 open Dockerfile
 open Dockerfile_opam
 
-let generate output_dir =
+let generate odir =
+  let maintainer = "Anil Madhavapeddy <anil@recoil.org>" in
   let apt_base base tag  = 
-    header base tag @@
+    header ~maintainer base tag @@
     Apt.install_base_packages @@
     Apt.install_system_ocaml
   in
   let rpm_base ?(ocaml=true) base tag =
-    header base tag @@
+    header ~maintainer base tag @@
     RPM.install_base_packages @@
     (if ocaml then RPM.install_system_ocaml else empty)
   in
   let apk_base base tag = 
-    header base tag @@
+    header ~maintainer base tag @@
     Linux.Apk.dev_packages () @@
     run "cd /etc/apk/keys && curl -OL http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/x86_64/anil@recoil.org-5687cc79.rsa.pub" @@
     run "echo http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/ >> /etc/apk/repositories" @@
     Linux.Apk.update @@
     Linux.Apk.install "ocaml camlp4"
   in
-  generate_dockerfiles_in_git_branches output_dir [
+  Dockerfile_distro.generate_dockerfiles_in_git_branches odir [
+     "ubuntu-12.04", apt_base "ubuntu" "precise";
      "ubuntu-14.04", apt_base "ubuntu" "trusty";
      "ubuntu-15.04", apt_base "ubuntu" "vivid";
      "ubuntu-15.10", apt_base "ubuntu" "wily";
-     "ubuntu", apt_base "ubuntu" "wily"; (* latest ubuntu *)
+     "ubuntu-16.04", apt_base "ubuntu" "xenial";
+     "ubuntu", apt_base "ubuntu" "wily"; (* latest stable ubuntu *)
+     "debian-9", apt_base "debian" "stretch"; (* 9 isnt tagged on Hub yet *)
+     "debian-8", apt_base "debian" "8";
+     "debian-7", apt_base "debian" "7";
+     "debian", apt_base "debian" "stable";
      "debian-stable", apt_base "debian" "stable";
      "debian-testing", apt_base "debian" "testing";
      "debian-unstable", apt_base "debian" "unstable";

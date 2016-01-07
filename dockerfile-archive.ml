@@ -9,14 +9,15 @@ open Dockerfile_opam
 
 let generate output_dir =
   let opam_archive =
-    header "ocaml/ocaml" "ubuntu-15.10-ocaml-4.02.3" @@
+    header "ocaml/opam" "ubuntu-15.10_ocaml-4.02.3" @@
     run_as_opam "cd /home/opam/opam-repository && git pull origin master" @@
     run_as_opam "opam update -u -y" @@
     run_as_opam "OPAMYES=1 OPAMJOBS=2 opam depext -u -i lwt ssl tls cohttp" @@
     run_as_opam "cd /home/opam/opam-repository && opam-admin make" @@
     onbuild (run_as_opam "cd /home/opam/opam-repository && git pull && opam-admin make")
   in
-  generate_dockerfiles "docker-opam-archive" [ "opam-archive", opam_archive ]
+  Dockerfile_distro.generate_dockerfiles output_dir
+    [ "opam-archive", opam_archive ]
 
 let _ =
   Dockerfile_opam_cmdliner.cmd
@@ -28,7 +29,7 @@ let _ =
              as a linked Docker container for bulk builds.  It depends on
              the base OCaml and OPAM containers that are generated via the
              $(b,opam-dockerfile-opam) command."
-    ~default_dir:"docker-opam-archive"
+    ~default_dir:"opam-archive-dockerfiles"
     ~generate
   |> Dockerfile_opam_cmdliner.run
 

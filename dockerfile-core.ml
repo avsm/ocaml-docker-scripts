@@ -6,20 +6,24 @@ Ocaml.packs := ["dockerfile.opam"; "dockerfile.opam-cmdliner"]
 
 open Dockerfile
 open Dockerfile_opam
+module DD = Dockerfile_distro
 
 let libs =
   "async_ssl jenga cohttp cryptokit menhir core_bench yojson core_extended"
 
-let generate output_dir =
-  let core tag =
-    header "ocaml/opam-dockerfiles" tag @@
-    run_as_opam "env OPAMYES=1 OPAMVERBOSE=1 OPAMJOBS=2 opam depext -i %s" libs
+let generate odir =
+  let matrix =
+    DD.map ~org:"ocaml/opam"
+      (fun ~distro ~ocaml_version base ->
+        let dfile =
+          base @@
+          run_as_opam "opam depext %s" libs @@
+          run_as_opam "opam install -j 2 -y -v %s" libs
+        in
+        let tag = (DD.opam_tag_of_distro distro ocaml_version) ^ "_core" in
+        (tag, dfile))
   in
-  generate_dockerfiles output_dir [
-    "ubuntu-14.04_ocaml-4.02.1-core", core "ubuntu-14.04-ocaml-4.02.1-local";
-    "debian-stable-ocaml-4.02.1-core", core "debian-stable-ocaml-4.02.1";
-    "centos-7-ocaml-4.02.1-system", core "centos-7-ocaml-4.02.1";
-  ]
+  Dockerfile_distro.generate_dockerfiles_in_git_branches odir matrix
 
 let _ =
   Dockerfile_opam_cmdliner.cmd
@@ -30,12 +34,12 @@ let _ =
              Core, Async and the Jenga build system, for various Linux
              distributions. It depends on the base OCaml and OPAM containers
              that are generated via the $(b,opam-dockerfile-opam) command."
-    ~default_dir:"docker-opam-core-build"
+    ~default_dir:"core-dockerfiles"
     ~generate
   |> Dockerfile_opam_cmdliner.run
 
 (*
- * Copyright (c) 2015 Anil Madhavapeddy <anil@recoil.org>
+ * Copyright (c) 2016 Anil Madhavapeddy <anil@recoil.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
